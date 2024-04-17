@@ -5,4 +5,4 @@ The system incorporates design aspects from [Dexhune-P](https://medium.com/@gene
 
 The hotswap contracts are structured differently from other versions of Dexhune, rather than a singular Exchange contract carrying out orders there are instead individual "controllers" who manage tokens in assigned liquidity contracts. 
 
-The Hotswap contracts will be deployed to Polygon MATIC, the team will list xPLEBs NFTs with a bridged version of Plebbit Token. 
+The Hotswap contracts will be deployed to Polygon POS, the team will list xPLEBs NFTs with wMATIC.
