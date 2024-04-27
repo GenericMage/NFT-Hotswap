@@ -136,7 +136,7 @@ Functions;
 
 - queryLiquidity; returns the full Liquidity contract details excluding Liquidity slots. 
 
-! NFT Hotswap factory ! 
+# NFT Hotswap factory 
 Deploys new hotswap controllers and hotswap LP contracts, this uses a stated ERC-20 address and ERC-721 address provided by the deployer. Fee collector is predefined into each controller/LP but can be changed by the owner, all deployed hotswaps are owned by the factory, can push transaction to change collector address on a hotswap or transfer ownership of a liquidity contract to a new controller. 
 
 Functions ; 
