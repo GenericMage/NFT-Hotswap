@@ -1,10 +1,10 @@
-# Premise
+///  Premise ///
 An NFT liquidity protocol based on CF/CP 
 
-# General
+/// General ///
 The System is made up of (3) contracts; NFT Hotswap Factory, NFT Hotswap Controller, and NFT Hotswap Liquidity. 
 
-# Hotswap Liquidity
+/// Hotswap Liquidity ///
 This contract holds [NFT] items and [FFT] units for the listed tokens, allows an owner/controller to withdraw tokens from it, thereby enabling swaps. 
 The controller can transfer ownership, thereby allowing the existing controller to be updated. Controllers are owned by the hotswap factory, both controllers and liquidity contracts are created by the factory.  
 
@@ -17,7 +17,7 @@ Functions;
 - NFT ; returns the stored NFT contract address. 
 
 
-# Hotswap Controller
+/// Hotswap Controller ///
 This contract lets users pair NFTs and FFTs (Float-enabled fungible tokens) using CF/CP. The NFT collection and FFT token are set as constructor arguments. 
 Swaps are instant and exchange a stated amount of NFT for a determined amount of FFT. That is; the user specifies how many NFT items they want to buy or sell, the hotswap then determines how much it would cost or yield then executes the swap.
 
@@ -82,7 +82,7 @@ Withdraws a pairing of NFT and FFT based on how much the caller is owed and the 
 - liquidityAddress; 
 Set during deployment by the factory, determines where NFT items and FFT units are withdrawn / deposited to for swap or liquidity functions. 
 
-## Liquidity Slots
+! Liquidity Slots !
 Each controller has storages for liquidity, these manage allocations of [NFT] and [FFT] stored under 'xLiquid' and 'yLiquid', users can add to these balances by using function 'depositNFT' and depositFFT' respectively. Each time a user deposits; their details get written to 1/10000 'liquidity slots', each liquidity slot holds the following details;
 
 depositor : (address)
@@ -158,10 +158,10 @@ Transfers ownership of the contract to a target address.
 - setDefaultCollector ;
 Determines the collector address set into controllers by default, also determines where LP creation fees are sent. 
 
-## Wrapped Plebbit
+! Wrapped Plebbit !
 A simple interchain token built using Axelar. 
 
-# Examples
+/// Examples /// 
 
 E1 : If a user deposited 1000 [FFT] but at the time of withdrawal there is 2000 [FFT] to 1500 [NFT] in the x and y liquid, the contract calculates; 
 
@@ -216,5 +216,5 @@ This means the buyer makes no profit from trading with themselves and in fact lo
 E5 : same as E4 but after the first user buys; any number of users then also buy the NFT, driving the price up by 10%, now the price is 5.55 [FFT]. When the user attempts to sell; the price they sell at is 5.4945 [FFT] due to impact/delta. Thus they made profit at the expense of the other buyer(s). 
 
 
-# Notes
+/// Notes ///
 - Initial collector will be a personal multi-sig, but will be changed to MarkerDAO later on. 

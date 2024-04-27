@@ -22,85 +22,37 @@ Text link that says "Factory".
 
 1f ; Github link
 
-1g ; PLEB Bridge Contract; 
-Text link that says "PLEB bridge". 
+1g ; Trade menu.
 
-1h ; Integrates $PLEB Sticker 
+1h ; PLEB price comparison ;
+Calculates the value of the NFT in FFT by fetching the amounts of both in the LP. 
 
-1i ; Trade menu.
+Example; there is 10,000,000 FFT and 10 NFT in the LP, (FFT amount) / (NFT amount) = 1,000,000. 
 
-1j ; PLEB price comparison ;
-(Skip till mainnet deployment)
-(Only visible if the token being traded is xPLEB), 
-This display has (3) operations that occur only once when the app is loaded. 
-
-Op1 :
-
-This fetches the LP pair for PLEB on ETH mainnet and determines the PLEB to ETH price, then fetches the ETH to USD price and determines the PLEB price to USD. 
-
-Presents the PLEB to USD price. 
-
-Op2 :
-
-This fetches the xPLEBs to ETH floor price on OpenSea, converts it to USD then fetches the wPLEB to xPLEB price and converts it to USD, thus presenting a USD price for wPLEB.    
-
-example; 
-xPLEB on OpenSea is 0.001ETH, in USD this is $3.226. 
-
-If there is 10,000,000 wPLEB in the hotswap LP while there is 10 xPLEB, this is wPLEB / xPLEB = 1,000,000 wPLEB to 1 xPLEB. 
-
-Now the important part; if one xPLEB on OpenSea is $3.226 the app calculates; 3.226 / 1,000,000 = 0.000003226.
-
-Thus the wPLEB price is $0.000003226. 
-
-Op3 :
-
-xPLEB price is presented as well, by first dividing the amount of wPLEB in the hotswap LP with the amount of xPLEB. 
-
-example; 10,000,000 wPLEB / 10 xPLEB = 1,000,000 wPLEB to 1 xPLEB. 
-
-The exact USD price is gotten by using the price of PLEB from the first operation, So if the PLEB price is $0.000008, then the xPLEB price is; $8. 
-
-Note; this specifically uses PLEB price and not wPLEB. 
-
-***
-
-All prices are displayed as;
-
-$8.0e-6 PLEB , 
-
-$3.2e-6 wPLEB, 
-
-$8 xPLEB.
-
-
-1k ; Amount Field ;
+1i; Amount Field ;
 Allows the user to state a number of NFTs to buy or sell. 
 
-1l ; Buy/sell toggle ;
+1j ; Buy/sell toggle ;
 Determines if the swap is for buy or sell.
 
-1m ; Cost/settlement display ;
+1k ; Cost/settlement display ;
 Shows how much [FFT] the swap will cost or settle. 
 
-1n ; Swap button ;
+1l ; Swap button ;
 (Presents a popup to approve the NFT or FFT for trade if not already approved)
 Pushes a transaction to execute the swap with the stated details. 
 
-1o ; Liquidity menu button ;
+1m ; Liquidity menu button ;
 Presents Page 2.
 
-1p ; Bridge PLEB menu button ; 
-Presents page 3.
-
-1q ; Listing Menu ; 
+1n ; Listing Menu ; 
 Presents page 4.
 
-1r ; close button ; 
+1o ; close button ; 
 Closes the trade menu.
 
 
-! Page 2 ! (Skip this)
+! Page 2 ! 
 
 2a ; Liquidity menu
 
@@ -126,31 +78,12 @@ Pushes a transaction to claim fees on a given liquidity position.
 2i ; Close button (returns the user to the main menu)
 
 ! Page 3 ! 
-3a ; Bridge menu
+3a ; Listing menu
 
-3b ; Amount field
+3b ; NFT Address 
 
-3c ; Direction toggle ;
-Determines if the user is moving PLEB (Ethereum Mainnet) to wPLEB (Polygon Mainnet) or vice versa.  If set to "ETH" this means the destination is ETH, if "MATIC" then the destination is MATIC.
+3c ; FFT Address 
 
-3d ; Bridge button ; 
-(prompts user to approve PLEB, prompts user to add PLEB token)
-Pushes a transaction to bridge their tokens with the details provided.
+3d ; List button
 
-3e ; Close button
-
-! Page 4 ! (skip this)
-4a ; Listing menu
-
-4b ; NFT Address 
-
-4c ; FFT Address 
-
-4d ; List button
-
-4e ; close button
-
-/// notes ///
-- if PLEB pamps people will buy wPLEB and bridge to ETH to sell as PLEB, and vice versa. 
-
-- More volume = more fees = more LP providers = more demand.  
+3e ; close button
