@@ -9,7 +9,7 @@ import "./HotswapController.sol";
 
 contract HotswapFactory is HotswapBase {
     address[] controllers;
-    address[] liquidity;
+    address[] liquidities;
 
     address _defaultCollector;
 
@@ -35,13 +35,16 @@ contract HotswapFactory is HotswapBase {
         }
         
         HotswapController controller = HotswapController(nft, fft);
-        address controllerAddr = address(controller);
-
         HotswapLiquidity liquidity = HotswapLiquidity(nft, fft);
+
+        address controllerAddr = address(controller);
+        address liquidityAddr = address(liquidity);
+
         liquidity.setController(controllerAddr);
+        controller.setLiquidity(liquidityAddr);
         
         controllers.push(controllerAddr);
-        liquidity.push(address(liquidity));
+        liquidities.push(address(liquidity));
     }
 
     function setDefaultCollector(address addr) external {

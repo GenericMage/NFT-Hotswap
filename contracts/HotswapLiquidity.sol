@@ -14,8 +14,8 @@ contract HotswapLiquidity is HotswapBase {
         NFT = nft;
         FFT = fft;
 
-        _nft = ERC721Enumerable(nft);
         _fft = ERC20(fft);
+        _nft = ERC721Enumerable(nft);
     }
 
     address public NFT;
