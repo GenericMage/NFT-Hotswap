@@ -8,6 +8,7 @@ import "./HotswapLiquidity.sol";
 
 interface IHotswapController {
     function setCollector(address addr) external;
+
     function setLiquidity(address addr) external;
 }
 
@@ -15,6 +16,7 @@ interface IHotswapLiquidity {
     function setController(address addr) external;
 
     function withdrawFFT(uint256 amount, address dest) external;
+
     function withdrawNFT(uint256 amount, address dest) external;
 }
 
@@ -28,12 +30,13 @@ contract HotswapControllerBase is Ownable, IHotswapController {
 
     uint256 public _price;
 
-    internal ERC20 _fft;
-    internal ERC721Enumerable _nft;
+    ERC20 internal _fft;
+    ERC721Enumerable internal _nft;
 
     mapping(address => uint256[]) internal _liquidityByUser;
-    
+
     Liquid[] public _liquidities;
+    uint256 public _fees;
 
     constructor(address nft, address fft) {
         _collector = msg.sender;
@@ -44,7 +47,7 @@ contract HotswapControllerBase is Ownable, IHotswapController {
         _nft = ERC721Enumerable(nft);
     }
 
-    function _computePrice() private {
+    function _computePrice() internal returns (uint256) {
         uint256 fBalance = _fft.balanceOf(_liquidity);
         uint256 nBalance = _nft.balanceOf(_liquidity);
 
@@ -65,9 +68,9 @@ contract HotswapControllerBase is Ownable, IHotswapController {
     struct Liquid {
         address depositor;
         uint256 depositedAt;
-        bool depositType;
         uint256 price;
-        uint256 amount;
+        uint256 nftAlloc;
+        uint256 fftAlloc;
         bool claimed;
         uint256 userIndex;
     }
@@ -75,9 +78,9 @@ contract HotswapControllerBase is Ownable, IHotswapController {
     struct LiquidData {
         address depositor;
         uint256 depositedAt;
-        bool depositType;
         uint256 price;
-        uint256 amount;
+        uint256 nftAlloc;
+        uint256 fftAlloc;
         bool claimed;
     }
 }
