@@ -79,14 +79,16 @@ contract HotswapController is HotswapControllerBase {
         userLiquid.push(index);
     }
 
-    function queryLiquid(uint256 index) external returns (LiquidData memory) {
+    function queryLiquid(
+        uint256 index
+    ) external view returns (LiquidData memory) {
         return queryLiquidbyDepositor(msg.sender, index);
     }
 
     function queryLiquidbyDepositor(
         address depositor,
         uint256 index
-    ) public returns (LiquidData memory) {
+    ) public view returns (LiquidData memory) {
         uint256[] memory indexes = _liquidityByUser[depositor];
         require(index < indexes.length, "Index out of range");
 
@@ -105,7 +107,7 @@ contract HotswapController is HotswapControllerBase {
             );
     }
 
-    function getLiquidityCount(bool isFFT) external returns (uint256) {
+    function getLiquidityCount(bool isFFT) external view returns (uint256) {
         if (isFFT) {
             return _fftLiquidityCount;
         } else {
@@ -214,10 +216,10 @@ contract HotswapController is HotswapControllerBase {
 
         uint256 price = _price;
 
-        uint256 targetAmount = amount / price;
+        uint256 fftAmount = amount * price;
 
-        targetAmount -= _deductFee(targetAmount);
-        uint256 nftAmount = targetAmount * price;
+        fftAmount -= _deductFee(fftAmount);
+        uint256 nftAmount = fftAmount / price;
 
         bool success;
         uint256 index;
@@ -229,7 +231,7 @@ contract HotswapController is HotswapControllerBase {
             i = j - 1;
             source = _liquidities[indexes[i]];
 
-            (success, index) = _findSuitableLiquid(1, false);
+            (success, index) = _findSuitableLiquid(false);
             target = _liquidities[index];
 
             nftAmount = _swapNFTLiquid(source, target, nftAmount, price);
@@ -238,55 +240,35 @@ contract HotswapController is HotswapControllerBase {
         require(nftAmount == 0, "Insufficient liquidity");
     }
 
-    /*
-    function _swapNFTLiquid(
-        Liquid storage liquid,
-        uint256 target,
-        uint256 price
-    ) private returns (uint256) {
-        uint256 swapAmount;
+    function swapFFT(uint256 amount) external {
+        Liquid storage source;
+        Liquid storage target;
 
-        if (liquid.nftAlloc <= target) {
-            swapAmount = liquid.nftAlloc;
-        } else {
-            swapAmount = target;
+        uint256[] memory indexes = _liquidityByUser[msg.sender];
+        uint256 price = _price;
+
+        uint256 targetAmount = _deductFee(amount);
+
+        uint256 fftAmount = targetAmount;
+
+        bool success;
+        uint256 index;
+
+        uint256 i;
+        uint256 j;
+
+        for (j = indexes.length; j > 0 && fftAmount > 0; j--) {
+            i = j - 1;
+            source = _liquidities[indexes[i]];
+
+            (success, index) = _findSuitableLiquid(true);
+            target = _liquidities[index];
+
+            fftAmount = _swapFFTLiquid(source, target, fftAmount, price);
         }
 
-        liquid.nftAlloc -= swapAmount;
-        target -= swapAmount;
-
-        liquid.fftAlloc += swapAmount * price;
-
-        return target;
+        require(fftAmount == 0, "Insufficient liquidity");
     }
-    */
-
-    /*
-    function _findSuitableOrder(address tokenAddr, uint256 amount) private view returns (bool success, uint256 index) {
-        Order memory order;
-        uint256[] storage norders = _ordersByToken[tokenAddr];
-
-        bool found;
-
-        uint256 i; uint256 j;
-
-        for (i = norders.length; i > 0 && !found; i--) {
-            j = i - 1;
-            uint256 n = norders[j];
-            order = _orders[n];
-
-            if (order.pending == amount) {
-                found = true;
-                index = n;
-            } else if (!found && order.pending >= amount) {
-                found = true;
-                index = n;
-            }
-        }
-
-        return (found, index);
-    }
-    */
 
     function _swapNFTLiquid(
         Liquid storage source,
@@ -311,8 +293,26 @@ contract HotswapController is HotswapControllerBase {
         return targetAmount;
     }
 
+    function _swapFFTLiquid(
+        Liquid storage source,
+        Liquid storage target,
+        uint256 targetAmount,
+        uint256 price
+    ) private returns (uint256) {
+        uint256 alloc = source.fftAlloc;
+
+        uint256 swapAmount = alloc <= targetAmount ? alloc : targetAmount;
+
+        source.fftAlloc -= swapAmount;
+        targetAmount -= swapAmount;
+
+        source.nftAlloc += swapAmount / price;
+        target.fftAlloc += swapAmount;
+
+        return targetAmount;
+    }
+
     function _findSuitableLiquid(
-        uint256 amount,
         bool isNFT
     ) private view returns (bool success, uint256 index) {
         Liquid memory liquid;
@@ -324,9 +324,9 @@ contract HotswapController is HotswapControllerBase {
 
             liquid = _liquidities[index];
 
-            if (!isNFT && liquid.fftAlloc >= amount) {
+            if (!isNFT && liquid.fftAlloc > 0) {
                 success = true;
-            } else if (isNFT && liquid.nftAlloc >= amount) {
+            } else if (isNFT && liquid.nftAlloc > 0) {
                 success = true;
             }
         }

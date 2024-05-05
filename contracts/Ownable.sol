@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-contract Ownable {
+interface IOwnable {
+    function transferOwnership(address newOwner) external;
+}
+
+contract Ownable is IOwnable {
     address internal _owner;
 
     event OwnershipRenounced(address indexed previousOwner);
