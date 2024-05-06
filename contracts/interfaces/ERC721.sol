@@ -2,7 +2,7 @@
 /// @title ERC721 interface implementation
 // Sources
 // https://eips.ethereum.org/EIPS/eip-721
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.25;
 
 /// @title ERC-721 Non-Fungible Token Standard
 /// @dev See https://eips.ethereum.org/EIPS/eip-721

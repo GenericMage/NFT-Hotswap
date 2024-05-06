@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 /// @title Hotswap Controller
 // Sources
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.25;
 
 import "./interfaces/ERC20.sol";
 import "./interfaces/ERC721.sol";

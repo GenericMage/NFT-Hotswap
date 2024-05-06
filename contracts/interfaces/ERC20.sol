@@ -2,7 +2,7 @@
 /// @title ERC20 interface implementation
 // Sources
 // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.25;
 
 interface ERC20 {
     function name() external view returns (string memory);
