@@ -52,7 +52,10 @@ contract HotswapControllerBase is Ownable, IHotswapController {
         uint256 nBalance = _nft.balanceOf(_liquidity);
 
         // TODO: Consider the decimal points, etc
-        _price = fBalance / nBalance;
+        if (nBalance != 0) {
+            _price = fBalance / nBalance;
+        }
+
         return _price;
     }
 

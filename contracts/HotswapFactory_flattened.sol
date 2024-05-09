@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // File: contracts/libraries/SafeMath.sol
 
+
 pragma solidity ^0.8.25;
 
 library SafeMath {
@@ -233,6 +234,7 @@ library SafeMath {
 
 // File: contracts/interfaces/ERC721.sol
 
+
 /// @title ERC721 interface implementation
 // Sources
 // https://eips.ethereum.org/EIPS/eip-721
@@ -335,6 +337,7 @@ interface ERC721Enumerable is ERC721 {
 
 // File: contracts/interfaces/ERC20.sol
 
+
 /// @title ERC20 interface implementation
 // Sources
 // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
@@ -374,6 +377,7 @@ interface ERC20 {
 }
 
 // File: contracts/Ownable.sol
+
 
 pragma solidity ^0.8.25;
 
@@ -426,7 +430,9 @@ contract Ownable is IOwnable {
 
 // File: contracts/HotswapBase.sol
 
+
 pragma solidity ^0.8.25;
+
 
 contract HotswapBase is Ownable {
     function _transferNative(
@@ -446,7 +452,13 @@ contract HotswapBase is Ownable {
 
 // File: contracts/HotswapLiquidity.sol
 
+
 pragma solidity ^0.8.25;
+
+
+
+
+
 
 contract HotswapLiquidity is HotswapBase {
     using SafeMath for uint256;
@@ -492,7 +504,12 @@ contract HotswapLiquidity is HotswapBase {
 
 // File: contracts/HotswapControllerBase.sol
 
+
 pragma solidity ^0.8.25;
+
+
+
+
 
 interface IHotswapController {
     function setCollector(address addr) external;
@@ -540,7 +557,10 @@ contract HotswapControllerBase is Ownable, IHotswapController {
         uint256 nBalance = _nft.balanceOf(_liquidity);
 
         // TODO: Consider the decimal points, etc
-        _price = fBalance / nBalance;
+        if (nBalance != 0) {
+            _price = fBalance / nBalance;
+        }
+
         return _price;
     }
 
@@ -575,9 +595,13 @@ contract HotswapControllerBase is Ownable, IHotswapController {
 
 // File: contracts/HotswapController.sol
 
+
 /// @title Hotswap Controller
 // Sources
 pragma solidity ^0.8.25;
+
+
+
 
 contract HotswapController is HotswapControllerBase {
     uint256 public nftLiquidity; // xLiquid
@@ -589,6 +613,8 @@ contract HotswapController is HotswapControllerBase {
     uint256 private constant FEE_RATIO_BY_TEN_THOUSAND = 5; // 0.05%
 
     constructor(address nft, address fft) HotswapControllerBase(nft, fft) {}
+
+    event HotswapDeployed(address controllor, address liquidity);
 
     function getPrice() public returns (uint256) {
         return _computePrice();
@@ -907,13 +933,25 @@ contract HotswapController is HotswapControllerBase {
 
 // File: contracts/HotswapFactory.sol
 
+
 pragma solidity ^0.8.25;
+
+
+
+
+
 
 contract HotswapFactory is HotswapBase {
     address[] controllers;
     address[] liquidities;
 
     address payable _defaultCollector;
+    //; uint256 private constant DEPLOY_FEE = 1e18;
+    uint256 private constant DEPLOY_FEE = 1e15;
+
+    constructor() {
+        _defaultCollector = payable(msg.sender);
+    }
 
     function setCollector(
         address controllerAddr,
@@ -954,7 +992,7 @@ contract HotswapFactory is HotswapBase {
     }
 
     function deployHotswap(address nft, address fft) external payable {
-        require(msg.value == 1e18, "Invalid fee amount");
+        require(msg.value == DEPLOY_FEE, "Invalid fee amount");
 
         // TODO: Probably allow default collector to be changable
         if (_defaultCollector != address(0)) {
@@ -971,7 +1009,9 @@ contract HotswapFactory is HotswapBase {
         controller.setLiquidity(liquidityAddr);
 
         controllers.push(controllerAddr);
-        liquidities.push(address(liquidity));
+        liquidities.push(liquidityAddr);
+
+        emit HotswapDeployed(controllerAddr, liquidityAddr);
     }
 
     function setDefaultCollector(address addr) external {
@@ -992,4 +1032,6 @@ contract HotswapFactory is HotswapBase {
         arr.pop();
         return !isLast;
     }
+
+    event HotswapDeployed(address controllor, address liquidity);
 }

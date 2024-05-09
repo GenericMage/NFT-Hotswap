@@ -12,6 +12,12 @@ contract HotswapFactory is HotswapBase {
     address[] liquidities;
 
     address payable _defaultCollector;
+    //; uint256 private constant DEPLOY_FEE = 1e18;
+    uint256 private constant DEPLOY_FEE = 1e15;
+
+    constructor() {
+        _defaultCollector = payable(msg.sender);
+    }
 
     function setCollector(
         address controllerAddr,
@@ -52,7 +58,7 @@ contract HotswapFactory is HotswapBase {
     }
 
     function deployHotswap(address nft, address fft) external payable {
-        require(msg.value == 1e18, "Invalid fee amount");
+        require(msg.value == DEPLOY_FEE, "Invalid fee amount");
 
         // TODO: Probably allow default collector to be changable
         if (_defaultCollector != address(0)) {
@@ -69,7 +75,9 @@ contract HotswapFactory is HotswapBase {
         controller.setLiquidity(liquidityAddr);
 
         controllers.push(controllerAddr);
-        liquidities.push(address(liquidity));
+        liquidities.push(liquidityAddr);
+
+        emit HotswapDeployed(controllerAddr, liquidityAddr);
     }
 
     function setDefaultCollector(address addr) external {
@@ -90,4 +98,6 @@ contract HotswapFactory is HotswapBase {
         arr.pop();
         return !isLast;
     }
+
+    event HotswapDeployed(address controllor, address liquidity);
 }

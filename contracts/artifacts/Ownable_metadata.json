@@ -110,18 +110,18 @@
 			"bytecodeHash": "ipfs"
 		},
 		"optimizer": {
-			"enabled": true,
+			"enabled": false,
 			"runs": 200
 		},
 		"remappings": []
 	},
 	"sources": {
 		"contracts/HotswapFactory_flattened.sol": {
-			"keccak256": "0x4789fbebda24f63296659bc0648b2ad026ee3e3cc6f7ac24bf6c7e69d8873959",
+			"keccak256": "0x3ecfffb89a0adfb251508546710d60991ebc10df1ed6031785ce9e71eb6b5ec8",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://08fd524c0387a71306b5f1cc498dc8cdd625edb379a43274b1fdd277773b5c99",
-				"dweb:/ipfs/QmfRnrH5YrfKYFetsysK36hTs7ohgChd6CAH5uUmPPQApK"
+				"bzz-raw://4b7cfaba66e7de1ca53ab61f0de6bcfb756f74f7b88b328ab713edd49ce74a32",
+				"dweb:/ipfs/QmU9acVqShYZGSFAi5TDB8dDD42SwdchbtL51UPR8wXJxA"
 			]
 		}
 	},

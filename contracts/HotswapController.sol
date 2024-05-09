@@ -18,6 +18,8 @@ contract HotswapController is HotswapControllerBase {
 
     constructor(address nft, address fft) HotswapControllerBase(nft, fft) {}
 
+    event HotswapDeployed(address controllor, address liquidity);
+
     function getPrice() public returns (uint256) {
         return _computePrice();
     }
