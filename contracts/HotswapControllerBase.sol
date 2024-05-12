@@ -2,6 +2,7 @@
 pragma solidity ^0.8.25;
 
 import "./Ownable.sol";
+import "./HotswapPair.sol";
 import "./interfaces/ERC721.sol";
 import "./libraries/SafeMath.sol";
 import "./HotswapLiquidity.sol";
@@ -20,31 +21,21 @@ interface IHotswapLiquidity {
     function withdrawNFT(uint256 amount, address dest) external;
 }
 
-contract HotswapControllerBase is Ownable, IHotswapController {
+contract HotswapControllerBase is HotswapPair, IHotswapController {
     using SafeMath for uint256;
 
-    address public NFT;
-    address public FFT;
     address public _collector;
     address public _liquidity;
 
     uint256 public _price;
-
-    ERC20 internal _fft;
-    ERC721Enumerable internal _nft;
 
     mapping(address => uint256[]) internal _liquidityByUser;
 
     Liquid[] public _liquidities;
     uint256 public _fees;
 
-    constructor(address nft, address fft) {
+    constructor(address nft, address fft) HotswapPair(nft, fft) {
         _collector = msg.sender;
-        NFT = nft;
-        FFT = fft;
-
-        _fft = ERC20(fft);
-        _nft = ERC721Enumerable(nft);
     }
 
     function _computePrice() internal returns (uint256) {

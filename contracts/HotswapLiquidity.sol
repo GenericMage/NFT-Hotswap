@@ -5,30 +5,19 @@ import "./Ownable.sol";
 import "./libraries/SafeMath.sol";
 import "./interfaces/ERC20.sol";
 import "./interfaces/ERC721.sol";
-import "./HotswapBase.sol";
+import "./HotswapPair.sol";
 
-contract HotswapLiquidity is HotswapBase {
+contract HotswapLiquidity is HotswapPair {
     using SafeMath for uint256;
 
-    constructor(address nft, address fft) {
-        NFT = nft;
-        FFT = fft;
-
-        _fft = ERC20(fft);
-        _nft = ERC721Enumerable(nft);
-    }
-
-    address public NFT;
-    address public FFT;
-    address public Controller;
-
-    ERC20 _fft;
-    ERC721Enumerable _nft;
+    address public controller;
 
     modifier onlyAuthorized() {
-        require(msg.sender == _owner || msg.sender == Controller);
+        require(msg.sender == _owner || msg.sender == controller);
         _;
     }
+
+    constructor(address nft, address fft) HotswapPair(nft, fft) {}
 
     function withdrawFFT(uint256 amount, address dest) external onlyAuthorized {
         require(_fft.transfer(dest, amount), "Withdrawal failed");
@@ -45,6 +34,6 @@ contract HotswapLiquidity is HotswapBase {
     }
 
     function setController(address addr) external onlyOwner {
-        Controller = addr;
+        controller = addr;
     }
 }

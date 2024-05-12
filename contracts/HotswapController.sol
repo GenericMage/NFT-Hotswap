@@ -16,9 +16,9 @@ contract HotswapController is HotswapControllerBase {
 
     uint256 private constant FEE_RATIO_BY_TEN_THOUSAND = 5; // 0.05%
 
-    constructor(address nft, address fft) HotswapControllerBase(nft, fft) {}
-
     event HotswapDeployed(address controllor, address liquidity);
+
+    constructor(address nft, address fft) HotswapControllerBase(nft, fft) {}
 
     function getPrice() public returns (uint256) {
         return _computePrice();

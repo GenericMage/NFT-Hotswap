@@ -65,17 +65,29 @@ contract HotswapFactory is HotswapBase {
             _transferNative(_defaultCollector, msg.value);
         }
 
+        _deployHotswap(nft, fft);
+    }
+
+    function _deployHotswap(address nft, address fft) private {
         HotswapController controller = new HotswapController(nft, fft);
         HotswapLiquidity liquidity = new HotswapLiquidity(nft, fft);
 
         address controllerAddr = address(controller);
         address liquidityAddr = address(liquidity);
 
-        liquidity.setController(controllerAddr);
-        controller.setLiquidity(liquidityAddr);
+        if (nft != address(0) && fft != address(0)) {
+            // controller.setNFT(nft);
+            // controller.setFFT(fft);
 
-        controllers.push(controllerAddr);
-        liquidities.push(liquidityAddr);
+            // liquidity.setNFT(nft);
+            // liquidity.setFFT(fft);
+
+            liquidity.setController(controllerAddr);
+            controller.setLiquidity(liquidityAddr);
+
+            controllers.push(controllerAddr);
+            liquidities.push(liquidityAddr);
+        }
 
         emit HotswapDeployed(controllerAddr, liquidityAddr);
     }

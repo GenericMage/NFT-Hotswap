@@ -282,9 +282,9 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/HotswapFactory_flattened.sol": "ERC721Enumerable"
+			"contracts/HotswapController_flattened.sol": "ERC721Enumerable"
 		},
-		"evmVersion": "paris",
+		"evmVersion": "cancun",
 		"libraries": {},
 		"metadata": {
 			"bytecodeHash": "ipfs"
@@ -296,12 +296,12 @@
 		"remappings": []
 	},
 	"sources": {
-		"contracts/HotswapFactory_flattened.sol": {
-			"keccak256": "0x3ecfffb89a0adfb251508546710d60991ebc10df1ed6031785ce9e71eb6b5ec8",
+		"contracts/HotswapController_flattened.sol": {
+			"keccak256": "0x7caed1bfca5aade34715617f18db51b598a761ac978c52f59f926ce3cc80da2f",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://4b7cfaba66e7de1ca53ab61f0de6bcfb756f74f7b88b328ab713edd49ce74a32",
-				"dweb:/ipfs/QmU9acVqShYZGSFAi5TDB8dDD42SwdchbtL51UPR8wXJxA"
+				"bzz-raw://a9cf4d4d4f1b9620ad7f975c0902de8ecce0002f3fb1ff08cfb69d29f61690ac",
+				"dweb:/ipfs/Qmb8gdoW5tf5yTEQ1ETnzidD9skkvxqu57u6TTE37bnwSS"
 			]
 		}
 	},
