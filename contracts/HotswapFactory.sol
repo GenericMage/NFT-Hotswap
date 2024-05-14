@@ -76,12 +76,6 @@ contract HotswapFactory is HotswapBase {
         address liquidityAddr = address(liquidity);
 
         if (nft != address(0) && fft != address(0)) {
-            // controller.setNFT(nft);
-            // controller.setFFT(fft);
-
-            // liquidity.setNFT(nft);
-            // liquidity.setFFT(fft);
-
             liquidity.setController(controllerAddr);
             controller.setLiquidity(liquidityAddr);
 
@@ -111,5 +105,5 @@ contract HotswapFactory is HotswapBase {
         return !isLast;
     }
 
-    event HotswapDeployed(address controllor, address liquidity);
+    event HotswapDeployed(address controller, address liquidity);
 }

@@ -56,7 +56,7 @@ interface ERC721 is ERC721Metadata {
         address _to,
         uint256 _tokenId,
         bytes memory data
-    ) external payable;
+    ) external;
 
     /// @notice Transfers the ownership of an NFT from one address to another address
     /// @dev This works identically to the other function with an extra data parameter,
@@ -68,7 +68,7 @@ interface ERC721 is ERC721Metadata {
         address _from,
         address _to,
         uint256 _tokenId
-    ) external payable;
+    ) external;
 
     /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
     ///  TO CONFIRM THAT `_to` IS CAPABLE OF RECEIVING NFTS OR ELSE
@@ -84,7 +84,7 @@ interface ERC721 is ERC721Metadata {
         address _from,
         address _to,
         uint256 _tokenId
-    ) external payable;
+    ) external;
 }
 
 /// @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
