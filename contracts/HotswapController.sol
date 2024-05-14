@@ -31,6 +31,7 @@ contract HotswapController is HotswapControllerBase {
         uint256 tokenId;
         bytes memory data = new bytes(0);
 
+        // TODO: Start based on current balance
         for (uint256 i = 0; i < amount; i++) {
             tokenId = _nft.tokenOfOwnerByIndex(msg.sender, i);
             _nft.safeTransferFrom(msg.sender, _liquidity, tokenId, data);

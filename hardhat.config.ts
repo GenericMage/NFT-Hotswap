@@ -6,7 +6,19 @@ configDotenv();
 
 // TODO: API keys leaked. Changed during production
 const config: HardhatUserConfig = {
-  solidity: "0.8.25",
+  solidity: {
+    compilers: [
+      {
+        version: "0.8.25",
+      },
+      {
+        version: "0.7.0",
+        settings: {},
+      },
+    ],
+  },
+
+  //"0.8.25",
   etherscan: {
     apiKey: process.env.FTM_API_KEY as string
   },
@@ -21,7 +33,7 @@ const config: HardhatUserConfig = {
     //     "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
     //   ]
     // },
-    fantom_testnet: {
+    ftm_testnet: {
       url: "https://rpc.testnet.fantom.network",
       chainId: 4002,
       accounts: [process.env.PRIVATE_KEY as string]

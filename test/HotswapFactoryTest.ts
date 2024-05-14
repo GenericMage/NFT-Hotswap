@@ -34,7 +34,7 @@ describe("HotswapFactory", function () {
     const HotswapLiquidity = await ethers.getContractFactory("HotswapLiquidity");
 
     const factory = await HotswapFactory.deploy();
-    const mockNFT = await (await ethers.getContractFactory("MockNFT")).deploy()
+    const mockNFT = await (await ethers.getContractFactory("MockNonFunLady")).deploy()
     const mockFFT = await (await ethers.getContractFactory("MockERC20")).deploy()
 
     ethers.provider.send("hardhat_setBalance", [
@@ -42,7 +42,14 @@ describe("HotswapFactory", function () {
       "0x10000000000000000000000000000000000000000",
     ]);
 
-    await mockNFT.mint(owner);
+    await mockNFT.flipSaleState();
+
+    await mockNFT.mintLady(30, {
+      value: 1000000000000000
+    });
+
+
+    // await mockNFT.mint(owner);
 
     const tx = await factory.deployHotswap(await mockNFT.getAddress(), await mockFFT.getAddress(), {
       value: BigInt(DEPLOY_FEE)
@@ -55,8 +62,11 @@ describe("HotswapFactory", function () {
     const controller = await HotswapController.attach(controllerAddr) as HotswapController;
     const liquidity = await HotswapLiquidity.attach(liquidityAddr) as HotswapLiquidity;
 
+    console.log(`\n\nController: ${controllerAddr}\nLiquidity: ${liquidityAddr}`);
+    console.log(); console.log();
 
 
+    await mockNFT.setApprovalForAll(controllerAddr, true);
 
 
     return { mockNFT, mockFFT, factory, controller, liquidity }
@@ -98,9 +108,11 @@ describe("HotswapFactory", function () {
       const { factory, mockFFT, mockNFT, controller, liquidity } = await loadFixture(deploy);
       const [owner] = await ethers.getSigners();
 
-      await controller.depositNFT(1);
+      const liqAddr = await liquidity.getAddress();
 
-      expect(await mockNFT.ownerOf(1)).to.eq(await liquidity.getAddress(), "Liquidity does not own the NFT");
+      await controller.depositNFT(2);
+      await expect(mockNFT.tokenOfOwnerByIndex(liqAddr, 0)).not.be.reverted;
+      await expect(mockNFT.tokenOfOwnerByIndex(liqAddr, 1)).not.be.reverted;
     });
   });
 });
