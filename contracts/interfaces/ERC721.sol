@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause
 /// @title ERC721 interface implementation
 // Sources
 // https://eips.ethereum.org/EIPS/eip-721

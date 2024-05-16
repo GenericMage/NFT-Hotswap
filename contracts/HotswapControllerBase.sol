@@ -1,10 +1,11 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause
 pragma solidity ^0.8.25;
 
 import "./Ownable.sol";
 import "./HotswapPair.sol";
 import "./interfaces/ERC721.sol";
 import "./libraries/SafeMath.sol";
+import "./libraries/PreciseMath.sol";
 import "./HotswapLiquidity.sol";
 
 interface IHotswapController {
@@ -27,6 +28,8 @@ contract HotswapControllerBase is HotswapPair, IHotswapController {
     address public _collector;
     address public _liquidity;
 
+    mapping(uint8 => uint256) private _scalars;
+
     uint256 public _price;
 
     mapping(address => uint256[]) internal _liquidityByUser;
@@ -40,21 +43,21 @@ contract HotswapControllerBase is HotswapPair, IHotswapController {
 
     function _computePrice() internal returns (uint256) {
         uint256 fBalance = _fft.balanceOf(_liquidity);
-        uint256 nBalance = _nft.balanceOf(_liquidity);
+        uint256 nNFT = _nft.balanceOf(_liquidity);
 
-        // TODO: Consider the decimal points, etc
-        if (nBalance != 0) {
-            _price = fBalance / nBalance;
-        }
+        uint256 nFFT = _normalize(fBalance, decimals);
+        nNFT = _normalize(nNFT, 18);
+
+        _price = _div(nFFT, nNFT);
 
         return _price;
     }
 
-    function setCollector(address addr) external onlyOwner {
+    function setCollector(address addr) public onlyOwner {
         _collector = addr;
     }
 
-    function setLiquidity(address addr) external onlyOwner {
+    function setLiquidity(address addr) public onlyOwner {
         _liquidity = addr;
         _computePrice();
     }
@@ -77,4 +80,39 @@ contract HotswapControllerBase is HotswapPair, IHotswapController {
         uint256 fftAlloc;
         bool claimed;
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Math
+    function _mul(uint256 num1, uint256 num2) internal pure returns (uint256) {
+        return PreciseMath.mul(num1, num2);
+    }
+
+    function _div(uint256 num1, uint256 num2) internal pure returns (uint256) {
+        return PreciseMath.div(num1, num2);
+    }
+
+    function _normalize(
+        uint256 amount,
+        uint8 decimals
+    ) internal returns (uint256) {
+        return decimals == 1 ? amount : amount * _computeScalar(decimals);
+    }
+
+    function _denormalize(
+        uint256 amount,
+        uint8 decimals
+    ) internal returns (uint256) {
+        return decimals == 1 ? amount : amount / _computeScalar(decimals);
+    }
+
+    function _computeScalar(uint8 decimals) internal returns (uint256 scalar) {
+        scalar = _scalars[decimals];
+
+        if (scalar == 0) {
+            unchecked {
+                _scalars[decimals] = scalar = 10 ** (18 - decimals);
+            }
+        }
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }

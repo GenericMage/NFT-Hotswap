@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause
 /// @title ERC20 interface implementation
 // Sources
 // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/

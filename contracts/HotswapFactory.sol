@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause
 pragma solidity ^0.8.25;
 
 import "./Ownable.sol";
@@ -8,11 +8,10 @@ import "./HotswapBase.sol";
 import "./HotswapController.sol";
 
 contract HotswapFactory is HotswapBase {
-    address[] controllers;
-    address[] liquidities;
+    address[] public controllers;
+    address[] public liquids;
 
     address payable _defaultCollector;
-    //; uint256 private constant DEPLOY_FEE = 1e18;
     uint256 private constant DEPLOY_FEE = 1e15;
 
     constructor() {
@@ -75,13 +74,15 @@ contract HotswapFactory is HotswapBase {
         address controllerAddr = address(controller);
         address liquidityAddr = address(liquidity);
 
-        if (nft != address(0) && fft != address(0)) {
-            liquidity.setController(controllerAddr);
-            controller.setLiquidity(liquidityAddr);
+        liquidity.setController(controllerAddr);
+        controller.setLiquidity(liquidityAddr);
 
-            controllers.push(controllerAddr);
-            liquidities.push(liquidityAddr);
+        if (_defaultCollector != address(0)) {
+            controller.setCollector(_defaultCollector);
         }
+
+        controllers.push(controllerAddr);
+        liquids.push(liquidityAddr);
 
         emit HotswapDeployed(controllerAddr, liquidityAddr);
     }

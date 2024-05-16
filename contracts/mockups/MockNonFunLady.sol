@@ -1,6 +1,6 @@
 // File: @openzeppelin/contracts/utils/Context.sol
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause
 
 pragma solidity >=0.6.0 <0.8.0;
 

@@ -1,4 +1,6 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause
+// Sources:
+// https://github.com/UniLend/unilendv2/blob/main/contracts/position.sol
 pragma solidity ^0.8.25;
 
 import "./HotswapBase.sol";
@@ -11,6 +13,7 @@ contract HotswapPair is HotswapBase, IERC721Receiver {
 
     ERC20 internal _fft;
     ERC721Enumerable internal _nft;
+    uint8 public decimals = 18;
 
     // Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
     // which can be also obtained as `IERC721Receiver(0).onERC721Received.selector`
@@ -37,6 +40,10 @@ contract HotswapPair is HotswapBase, IERC721Receiver {
     function setFFT(address addr) private {
         FFT = addr;
         _fft = ERC20(addr);
+
+        try _fft.decimals() returns (uint8 dec) {
+            decimals = dec;
+        } catch {}
     }
 
     constructor(address nft, address fft) {

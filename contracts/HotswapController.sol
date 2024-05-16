@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause
 /// @title Hotswap Controller
 // Sources
 pragma solidity ^0.8.25;
