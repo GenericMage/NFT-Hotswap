@@ -190,7 +190,7 @@ In this examples they added as follows;
 User-A : 10 hours ago, 
 User-B : 5 hours ago, 
 User-C : 2.5 hours ago, 
-User-D : 1.25 hours ago, 
+User-D : 1.25 hours ago, k
 
 The contract sums their times as; 18.75, if the lowest attempted to withdraw, their weighted duration limits how much they can claim, this is 1.25 / 18.75 * 100 = 6.666666666666666666%. 
 

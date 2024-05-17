@@ -3,6 +3,13 @@
 // Sources
 // https://eips.ethereum.org/EIPS/eip-721
 // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/IERC721Receiver.sol
+//   ::   .:      ...   :::::::::::: .::::::..::    .   .::::::.  ::::::::::.
+//  ,;;   ;;,  .;;;;;;;.;;;;;;;;'''';;;`    `';;,  ;;  ;;;' ;;`;;  `;;;```.;;;
+// ,[[[,,,[[[ ,[[     \[[,   [[     '[==/[[[[,'[[, [[, [[' ,[[ '[[, `]]nnn]]'
+// "$$$"""$$$ $$$,     $$$   $$       '''    $  Y$c$$$c$P c$$$cc$$$c $$$""
+//  888   "88o"888,_ _,88P   88,     88b    dP   "88"888   888   888,888o
+//  MMM    YMM  "YMMMMMP"    MMM      "YMmMY"     "M "M"   YMM   ""` YMMMb
+
 pragma solidity ^0.8.25;
 
 /// @title ERC-721 Non-Fungible Token Standard, optional metadata extension

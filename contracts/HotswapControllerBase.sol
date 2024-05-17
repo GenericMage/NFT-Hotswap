@@ -1,4 +1,11 @@
 // SPDX-License-Identifier: BSD-3-Clause
+//   ::   .:      ...   :::::::::::: .::::::..::    .   .::::::.  ::::::::::.
+//  ,;;   ;;,  .;;;;;;;.;;;;;;;;'''';;;`    `';;,  ;;  ;;;' ;;`;;  `;;;```.;;;
+// ,[[[,,,[[[ ,[[     \[[,   [[     '[==/[[[[,'[[, [[, [[' ,[[ '[[, `]]nnn]]'
+// "$$$"""$$$ $$$,     $$$   $$       '''    $  Y$c$$$c$P c$$$cc$$$c $$$""
+//  888   "88o"888,_ _,88P   88,     88b    dP   "88"888   888   888,888o
+//  MMM    YMM  "YMMMMMP"    MMM      "YMmMY"     "M "M"   YMM   ""` YMMMb
+
 pragma solidity ^0.8.25;
 
 import "./Ownable.sol";
@@ -28,14 +35,14 @@ contract HotswapControllerBase is HotswapPair, IHotswapController {
     address public _collector;
     address public _liquidity;
 
-    mapping(uint8 => uint256) private _scalars;
-
     uint256 public _price;
-
+    mapping(uint8 => uint256) private _scalars;
     mapping(address => uint256[]) internal _liquidityByUser;
 
-    Liquid[] public _liquidities;
+    Liquid[] public _liquids;
     uint256 public _fees;
+
+    HotswapLiquidity internal _liq;
 
     constructor(address nft, address fft) HotswapPair(nft, fft) {
         _collector = msg.sender;
@@ -59,6 +66,7 @@ contract HotswapControllerBase is HotswapPair, IHotswapController {
 
     function setLiquidity(address addr) public onlyOwner {
         _liquidity = addr;
+        _liq = HotswapLiquidity(addr);
         _computePrice();
     }
 

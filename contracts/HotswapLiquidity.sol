@@ -1,4 +1,11 @@
 // SPDX-License-Identifier: BSD-3-Clause
+//   ::   .:      ...   :::::::::::: .::::::..::    .   .::::::.  ::::::::::.
+//  ,;;   ;;,  .;;;;;;;.;;;;;;;;'''';;;`    `';;,  ;;  ;;;' ;;`;;  `;;;```.;;;
+// ,[[[,,,[[[ ,[[     \[[,   [[     '[==/[[[[,'[[, [[, [[' ,[[ '[[, `]]nnn]]'
+// "$$$"""$$$ $$$,     $$$   $$       '''    $  Y$c$$$c$P c$$$cc$$$c $$$""
+//  888   "88o"888,_ _,88P   88,     88b    dP   "88"888   888   888,888o
+//  MMM    YMM  "YMMMMMP"    MMM      "YMmMY"     "M "M"   YMM   ""` YMMMb
+
 pragma solidity ^0.8.25;
 
 import "./Ownable.sol";
@@ -18,6 +25,14 @@ contract HotswapLiquidity is HotswapPair {
     }
 
     constructor(address nft, address fft) HotswapPair(nft, fft) {}
+
+    function nftBalance() external view returns (uint256) {
+        return _nft.balanceOf(address(this));
+    }
+
+    function fftBalance() external view returns (uint256) {
+        return _fft.balanceOf(address(this));
+    }
 
     function withdrawFFT(uint256 amount, address dest) external onlyAuthorized {
         require(_fft.transfer(dest, amount), "Withdrawal failed");

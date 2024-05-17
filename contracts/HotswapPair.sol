@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Sources:
 // https://github.com/UniLend/unilendv2/blob/main/contracts/position.sol
+//   ::   .:      ...   :::::::::::: .::::::..::    .   .::::::.  ::::::::::.
+//  ,;;   ;;,  .;;;;;;;.;;;;;;;;'''';;;`    `';;,  ;;  ;;;' ;;`;;  `;;;```.;;;
+// ,[[[,,,[[[ ,[[     \[[,   [[     '[==/[[[[,'[[, [[, [[' ,[[ '[[, `]]nnn]]'
+// "$$$"""$$$ $$$,     $$$   $$       '''    $  Y$c$$$c$P c$$$cc$$$c $$$""
+//  888   "88o"888,_ _,88P   88,     88b    dP   "88"888   888   888,888o
+//  MMM    YMM  "YMMMMMP"    MMM      "YMmMY"     "M "M"   YMM   ""` YMMMb
+
 pragma solidity ^0.8.25;
 
 import "./HotswapBase.sol";
@@ -13,7 +20,9 @@ contract HotswapPair is HotswapBase, IERC721Receiver {
 
     ERC20 internal _fft;
     ERC721Enumerable internal _nft;
-    uint8 public decimals = 18;
+
+    uint8 internal constant DEFAULT_DECIMALS = 18;
+    uint8 public decimals = DEFAULT_DECIMALS;
 
     // Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
     // which can be also obtained as `IERC721Receiver(0).onERC721Received.selector`
