@@ -27,10 +27,6 @@ contract HotswapController is HotswapControllerBase {
 
     constructor(address nft, address fft) HotswapControllerBase(nft, fft) {}
 
-    function getPrice() public returns (uint256) {
-        return _computePrice();
-    }
-
     function depositNFT(uint256 amount) external {
         uint256 tokenId;
         bytes memory data = new bytes(0);
@@ -45,9 +41,7 @@ contract HotswapController is HotswapControllerBase {
     }
 
     function depositFFT(uint256 amount) external {
-        bool success = _fft.transferFrom(msg.sender, _liquidity, amount);
-
-        if (!success) {
+        if (!_fft.transferFrom(msg.sender, _liquidity, amount)) {
             revert DepositFailed();
         }
 
@@ -70,7 +64,15 @@ contract HotswapController is HotswapControllerBase {
             liquid = _liquids[n];
 
             if (!liquid.claimed) {
-                nfees += _claimLiquidFees(liquid, totalLiquidity);
+                uint256 timeRatio = _div(
+                    liquid.depositedAt,
+                    _cumulativeTimestamp
+                );
+                uint256 valueRatio = _div(liquid.fftAlloc, totalLiquidity);
+
+                liquid.claimed = true;
+
+                nfees += _div(timeRatio + valueRatio, 2e18); // (timeRatio + valueRatio) / 2;
             }
         }
 
@@ -80,18 +82,6 @@ contract HotswapController is HotswapControllerBase {
 
         uint256 fees = _denormalize(nfees, decimals);
         _liq.withdrawFFT(fees, targetAddr);
-    }
-
-    function _claimLiquidFees(
-        Liquid storage liquid,
-        uint256 totalLiquidity
-    ) private returns (uint256) {
-        uint256 timeRatio = _div(liquid.depositedAt, _cumulativeTimestamp);
-        uint256 valueRatio = _div(liquid.fftAlloc, totalLiquidity);
-
-        liquid.claimed = true;
-
-        return _div(timeRatio + valueRatio, 2e18); // (timeRatio + valueRatio) / 2
     }
 
     function _createLiquid(uint256 amount, bool kind) private {
@@ -213,36 +203,6 @@ contract HotswapController is HotswapControllerBase {
             userIndex = last.userIndex;
             _liquidityByUser[last.depositor][userIndex] = index;
         }
-    }
-
-    function _removeItem(
-        Liquid[] storage arr,
-        uint256 index
-    ) internal returns (bool) {
-        uint256 last = arr.length - 1;
-        bool isLast = index == last;
-
-        if (!isLast) {
-            arr[index] = arr[last];
-        }
-
-        arr.pop();
-        return !isLast;
-    }
-
-    function _removeItem(
-        uint256[] storage arr,
-        uint256 index
-    ) internal returns (bool) {
-        uint256 last = arr.length - 1;
-        bool isLast = index == last;
-
-        if (!isLast) {
-            arr[index] = arr[last];
-        }
-
-        arr.pop();
-        return !isLast;
     }
 
     function _deductFee(uint256 amount) private returns (uint256) {

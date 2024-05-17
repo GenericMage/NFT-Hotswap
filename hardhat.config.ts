@@ -1,6 +1,7 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import { configDotenv } from "dotenv";
+require("hardhat-contract-sizer");
 
 configDotenv();
 
@@ -11,18 +12,25 @@ const config: HardhatUserConfig = {
       {
         version: "0.8.25",
 
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        }
+        // settings: {
+        //   optimizer: {
+        //     enabled: true,
+        //     runs: 1000,
+        //   },
+        // }
       },
       {
         version: "0.7.0",
         settings: {},
       },
     ],
+  },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
+    //only: [':ERC20$'],
   },
 
   //"0.8.25",

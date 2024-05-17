@@ -15,7 +15,7 @@ pragma solidity ^0.8.25;
 
 import "../interfaces/ERC721.sol";
 
-contract MockNFTBase is ERC721, ERC721Enumerable {
+contract MockNFTBase is ERC721 {
     mapping(address => uint256) _balances;
     mapping(uint256 tokenId => address) private _owners;
     mapping(uint256 tokenId => address) private _tokenApprovals;
@@ -38,19 +38,15 @@ contract MockNFTBase is ERC721, ERC721Enumerable {
         return "MockNFT";
     }
 
-    function symbol() external pure override returns (string memory _symbol) {
+    function symbol() external pure returns (string memory _symbol) {
         return "MCK_NFT";
     }
 
-    function tokenURI(
-        uint256 _tokenId
-    ) external view override returns (string memory) {
+    function tokenURI(uint256 _tokenId) external view returns (string memory) {
         return "";
     }
 
-    function ownerOf(
-        uint256 _tokenId
-    ) external view override returns (address) {
+    function ownerOf(uint256 _tokenId) external view returns (address) {
         return _requireOwned(_tokenId);
     }
 
@@ -289,11 +285,11 @@ contract MockNFTBase is ERC721, ERC721Enumerable {
         return owner;
     }
 
-    function totalSupply() external view virtual override returns (uint256) {}
+    function totalSupply() external view virtual returns (uint256) {}
 
     function tokenByIndex(
         uint256 _index
-    ) external view virtual override returns (uint256) {
+    ) external view virtual returns (uint256) {
         return _index;
     }
 

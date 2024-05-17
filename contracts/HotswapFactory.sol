@@ -13,6 +13,7 @@ import "./interfaces/ERC20.sol";
 import "./interfaces/ERC721.sol";
 import "./HotswapBase.sol";
 import "./HotswapController.sol";
+import "./HotswapLiquidity.sol";
 
 contract HotswapFactory is HotswapBase {
     address[] public controllers;
@@ -29,7 +30,7 @@ contract HotswapFactory is HotswapBase {
         address controllerAddr,
         address addr
     ) external onlyOwner {
-        IHotswapController(controllerAddr).setCollector(addr);
+        HotswapController(controllerAddr).setCollector(addr);
     }
 
     function setFactory(
@@ -60,7 +61,7 @@ contract HotswapFactory is HotswapBase {
         address liquidityAddr,
         address addr
     ) external onlyOwner {
-        IHotswapLiquidity(liquidityAddr).setController(addr);
+        HotswapLiquidity(liquidityAddr).setController(addr);
     }
 
     function deployHotswap(address nft, address fft) external payable {
@@ -71,10 +72,6 @@ contract HotswapFactory is HotswapBase {
             _transferNative(_defaultCollector, msg.value);
         }
 
-        _deployHotswap(nft, fft);
-    }
-
-    function _deployHotswap(address nft, address fft) private {
         HotswapController controller = new HotswapController(nft, fft);
         HotswapLiquidity liquidity = new HotswapLiquidity(nft, fft);
 
@@ -96,21 +93,6 @@ contract HotswapFactory is HotswapBase {
 
     function setDefaultCollector(address addr) external {
         _defaultCollector = payable(addr);
-    }
-
-    function _removeItem(
-        uint256[] storage arr,
-        uint256 index
-    ) internal returns (bool) {
-        uint256 last = arr.length - 1;
-        bool isLast = index == last;
-
-        if (!isLast) {
-            arr[index] = arr[last];
-        }
-
-        arr.pop();
-        return !isLast;
     }
 
     event HotswapDeployed(address controller, address liquidity);

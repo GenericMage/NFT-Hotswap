@@ -23,5 +23,54 @@ contract HotswapBase is Ownable {
         return false;
     }
 
+    function _removeItem(
+        uint256[] storage arr,
+        uint256 index
+    ) internal returns (bool) {
+        uint256 last = arr.length - 1;
+        bool isLast = index == last;
+
+        if (!isLast) {
+            arr[index] = arr[last];
+        }
+
+        arr.pop();
+        return !isLast;
+    }
+
+    function _removeItem(
+        Liquid[] storage arr,
+        uint256 index
+    ) internal returns (bool) {
+        uint256 last = arr.length - 1;
+        bool isLast = index == last;
+
+        if (!isLast) {
+            arr[index] = arr[last];
+        }
+
+        arr.pop();
+        return !isLast;
+    }
+
+    struct Liquid {
+        address depositor;
+        uint256 depositedAt;
+        uint256 price;
+        uint256 nftAlloc;
+        uint256 fftAlloc;
+        bool claimed;
+        uint256 userIndex;
+    }
+
+    struct LiquidData {
+        address depositor;
+        uint256 depositedAt;
+        uint256 price;
+        uint256 nftAlloc;
+        uint256 fftAlloc;
+        bool claimed;
+    }
+
     event NativeTransferred(uint256 amount, address targetAddr);
 }

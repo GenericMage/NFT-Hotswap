@@ -35,30 +35,6 @@ library PreciseMath {
         return _mulDiv(x, UNIT, y);
     }
 
-    /// @notice Calculates x*y÷1e18 with 512-bit precision.
-    ///
-    /// @dev A variant of {mulDiv} with constant folding, i.e. in which the denominator is hard coded to 1e18.
-    ///
-    /// Notes:
-    /// - The body is purposely left uncommented; to understand how this works, see the documentation in {mulDiv}.
-    /// - The result is rounded toward zero.
-    /// - We take as an axiom that the result cannot be `MAX_UINT256` when x and y solve the following system of equations:
-    ///
-    /// $$
-    /// \begin{cases}
-    ///     x * y = MAX\_UINT256 * UNIT \\
-    ///     (x * y) \% UNIT \geq \frac{UNIT}{2}
-    /// \end{cases}
-    /// $$
-    ///
-    /// Requirements:
-    /// - Refer to the requirements in {mulDiv}.
-    /// - The result must fit in uint256.
-    ///
-    /// @param x The multiplicand as an unsigned 60.18-decimal fixed-point number.
-    /// @param y The multiplier as an unsigned 60.18-decimal fixed-point number.
-    /// @return result The result as an unsigned 60.18-decimal fixed-point number.
-    /// @custom:smtchecker abstract-function-nondet
     function _mulDiv18(
         uint256 x,
         uint256 y
@@ -97,22 +73,6 @@ library PreciseMath {
         }
     }
 
-    /// @notice Calculates x*y÷denominator with 512-bit precision.
-    ///
-    /// @dev Credits to Remco Bloemen under MIT license https://xn--2-umb.com/21/muldiv.
-    ///
-    /// Notes:
-    /// - The result is rounded toward zero.
-    ///
-    /// Requirements:
-    /// - The denominator must not be zero.
-    /// - The result must fit in uint256.
-    ///
-    /// @param x The multiplicand as a uint256.
-    /// @param y The multiplier as a uint256.
-    /// @param denominator The divisor as a uint256.
-    /// @return result The result as a uint256.
-    /// @custom:smtchecker abstract-function-nondet
     function _mulDiv(
         uint256 x,
         uint256 y,
@@ -193,10 +153,6 @@ library PreciseMath {
             inverse *= 2 - denominator * inverse; // inverse mod 2^128
             inverse *= 2 - denominator * inverse; // inverse mod 2^256
 
-            // Because the division is now exact we can divide by multiplying with the modular inverse of denominator.
-            // This will give us the correct result modulo 2^256. Since the preconditions guarantee that the outcome is
-            // less than 2^256, this is the final result. We don't need to compute the high bits of the result and prod1
-            // is no longer required.
             result = prod0 * inverse;
         }
     }

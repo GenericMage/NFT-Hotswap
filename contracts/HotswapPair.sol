@@ -19,7 +19,7 @@ contract HotswapPair is HotswapBase, IERC721Receiver {
     address public FFT;
 
     ERC20 internal _fft;
-    ERC721Enumerable internal _nft;
+    ERC721 internal _nft;
 
     uint8 internal constant DEFAULT_DECIMALS = 18;
     uint8 public decimals = DEFAULT_DECIMALS;
@@ -43,7 +43,7 @@ contract HotswapPair is HotswapBase, IERC721Receiver {
 
     function setNFT(address addr) private {
         NFT = addr;
-        _nft = ERC721Enumerable(addr);
+        _nft = ERC721(addr);
     }
 
     function setFFT(address addr) private {
