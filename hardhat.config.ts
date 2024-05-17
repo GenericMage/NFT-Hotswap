@@ -12,16 +12,24 @@ const config: HardhatUserConfig = {
       {
         version: "0.8.25",
 
-        // settings: {
-        //   optimizer: {
-        //     enabled: true,
-        //     runs: 1000,
-        //   },
-        // }
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+            details: { yul: false },
+          },
+        }
+
       },
       {
         version: "0.7.0",
-        settings: {},
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+            details: { yul: false },
+          },
+        }
       },
     ],
   },
@@ -36,6 +44,7 @@ const config: HardhatUserConfig = {
   //"0.8.25",
   etherscan: {
     apiKey: process.env.FTM_API_KEY as string
+    // apiKey: process.env.SNOWTRACE_API_KEY as string
   },
   networks: {
     // local: {
@@ -48,9 +57,17 @@ const config: HardhatUserConfig = {
     //     "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
     //   ]
     // },
+    // hardhat: {
+    //   allowUnlimitedContractSize: true
+    // },
     ftm_testnet: {
       url: "https://rpc.testnet.fantom.network",
       chainId: 4002,
+      accounts: [process.env.PRIVATE_KEY as string],
+    },
+    avax_testnet: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      chainId: 43113,
       accounts: [process.env.PRIVATE_KEY as string],
     }
   }

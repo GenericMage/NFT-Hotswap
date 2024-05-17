@@ -38,7 +38,9 @@ contract HotswapControllerBase is HotswapPair {
         uint256 nFFT = _normalize(fBalance, decimals);
         nNFT = _normalize(nNFT, 18);
 
-        _price = _div(nFFT, nNFT);
+        if (nNFT > 0) {
+            _price = _div(nFFT, nNFT);
+        }
 
         return _price;
     }

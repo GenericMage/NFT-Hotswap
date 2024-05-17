@@ -24,8 +24,22 @@ async function extractDeployEvent(tx: ContractTransactionResponse) {
   return [controllerAddr, liquidityAddr];
 }
 
+async function deployFactory() {
+  try {
+    const factory = await ethers.deployContract("HotswapFactory");
+
+    return factory;
+  } catch (err) {
+    console.log("Deploy failed", err)
+    throw err;
+  }
+}
+
 async function main() {
   configDotenv();
+
+  const feeData = await ethers.provider.getFeeData();
+  // console.log(feeData)
 
   const factory = await ethers.deployContract("HotswapFactory");
 

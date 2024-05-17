@@ -14,7 +14,7 @@ import "./HotswapBase.sol";
 import "./interfaces/ERC20.sol";
 import "./interfaces/ERC721.sol";
 
-contract HotswapPair is HotswapBase, IERC721Receiver {
+contract HotswapPair is HotswapBase {
     address public NFT;
     address public FFT;
 
@@ -33,12 +33,7 @@ contract HotswapPair is HotswapBase, IERC721Receiver {
             return "Legacy";
         }
 
-        string memory nftName = _nft.name();
-        string memory fftName = _fft.name();
-
-        string memory buffer = string.concat(nftName, " - ");
-
-        return string.concat(buffer, fftName);
+        return string.concat(string.concat(_nft.name(), " - "), _fft.name());
     }
 
     function setNFT(address addr) private {
@@ -50,9 +45,11 @@ contract HotswapPair is HotswapBase, IERC721Receiver {
         FFT = addr;
         _fft = ERC20(addr);
 
-        try _fft.decimals() returns (uint8 dec) {
-            decimals = dec;
-        } catch {}
+        if (addr != address(0)) {
+            try _fft.decimals() returns (uint8 dec) {
+                decimals = dec;
+            } catch {}
+        }
     }
 
     constructor(address nft, address fft) {
@@ -65,7 +62,7 @@ contract HotswapPair is HotswapBase, IERC721Receiver {
         address from,
         uint256 tokenId,
         bytes calldata data
-    ) external override returns (bytes4) {
+    ) external returns (bytes4) {
         return _ERC721_RECEIVED;
     }
 }
