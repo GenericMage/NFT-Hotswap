@@ -10,6 +10,13 @@ const config: HardhatUserConfig = {
     compilers: [
       {
         version: "0.8.25",
+
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        }
       },
       {
         version: "0.7.0",
@@ -36,7 +43,7 @@ const config: HardhatUserConfig = {
     ftm_testnet: {
       url: "https://rpc.testnet.fantom.network",
       chainId: 4002,
-      accounts: [process.env.PRIVATE_KEY as string]
+      accounts: [process.env.PRIVATE_KEY as string],
     }
   }
 };

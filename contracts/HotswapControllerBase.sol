@@ -11,7 +11,6 @@ pragma solidity ^0.8.25;
 import "./Ownable.sol";
 import "./HotswapPair.sol";
 import "./interfaces/ERC721.sol";
-import "./libraries/SafeMath.sol";
 import "./libraries/PreciseMath.sol";
 import "./HotswapLiquidity.sol";
 
@@ -30,8 +29,6 @@ interface IHotswapLiquidity {
 }
 
 contract HotswapControllerBase is HotswapPair, IHotswapController {
-    using SafeMath for uint256;
-
     address public _collector;
     address public _liquidity;
 
@@ -88,6 +85,10 @@ contract HotswapControllerBase is HotswapPair, IHotswapController {
         uint256 fftAlloc;
         bool claimed;
     }
+
+    error DepositFailed();
+    error InvalidWithdrawalRequest();
+    error InsufficientLiquidity();
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Math

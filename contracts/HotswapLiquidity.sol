@@ -9,14 +9,11 @@
 pragma solidity ^0.8.25;
 
 import "./Ownable.sol";
-import "./libraries/SafeMath.sol";
 import "./interfaces/ERC20.sol";
 import "./interfaces/ERC721.sol";
 import "./HotswapPair.sol";
 
 contract HotswapLiquidity is HotswapPair {
-    using SafeMath for uint256;
-
     address public controller;
 
     modifier onlyAuthorized() {

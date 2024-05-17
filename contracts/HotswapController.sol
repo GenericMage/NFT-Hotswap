@@ -32,11 +32,6 @@ contract HotswapController is HotswapControllerBase {
     }
 
     function depositNFT(uint256 amount) external {
-        require(
-            _liquidity != address(0),
-            "Liquidity address is yet to be assigned"
-        );
-
         uint256 tokenId;
         bytes memory data = new bytes(0);
 
@@ -52,7 +47,10 @@ contract HotswapController is HotswapControllerBase {
     function depositFFT(uint256 amount) external {
         bool success = _fft.transferFrom(msg.sender, _liquidity, amount);
 
-        require(success, "Transfer failed");
+        if (!success) {
+            revert DepositFailed();
+        }
+
         _createLiquid(amount, true);
     }
 
@@ -143,8 +141,6 @@ contract HotswapController is HotswapControllerBase {
         uint256 index
     ) public view returns (LiquidData memory) {
         uint256[] memory indexes = _liquidityByUser[depositor];
-        require(index < indexes.length, "Index out of range");
-
         uint256 n = indexes[index];
 
         Liquid memory lq = _liquids[n];
@@ -172,7 +168,9 @@ contract HotswapController is HotswapControllerBase {
         address user = msg.sender;
         uint256[] memory userLiquid = _liquidityByUser[user];
 
-        require(index < userLiquid.length, "Index out of range");
+        if (index >= userLiquid.length) {
+            revert InvalidWithdrawalRequest();
+        }
 
         uint256 n = userLiquid[index];
         Liquid memory lq = _liquids[n];
@@ -299,7 +297,9 @@ contract HotswapController is HotswapControllerBase {
             nftAmount = _swapNFTLiquid(source, target, nftAmount, price);
         }
 
-        require(nftAmount == 0, "Insufficient liquidity");
+        if (nftAmount > 0) {
+            revert InsufficientLiquidity();
+        }
     }
 
     function swapFFT(uint256 amount) external {
@@ -329,7 +329,9 @@ contract HotswapController is HotswapControllerBase {
             fftAmount = _swapFFTLiquid(source, target, fftAmount, price);
         }
 
-        require(fftAmount == 0, "Insufficient liquidity");
+        if (fftAmount > 0) {
+            revert InsufficientLiquidity();
+        }
     }
 
     function _swapNFTLiquid(
