@@ -1,0 +1,94 @@
+{
+	"compiler": {
+		"version": "0.8.25+commit.b61c2a91"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "x",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "y",
+						"type": "uint256"
+					}
+				],
+				"name": "MulDiv18Overflow",
+				"type": "error"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "x",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "y",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "denominator",
+						"type": "uint256"
+					}
+				],
+				"name": "MulDivOverflow",
+				"type": "error"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"stateVariables": {
+				"UNIT": {
+					"details": "The unit number, which the decimal precision of the fixed-point types."
+				},
+				"UNIT_INVERSE": {
+					"details": "The unit number inverted mod 2^256."
+				},
+				"UNIT_LPOTD": {
+					"details": "The the largest power of two that divides the decimal value of `UNIT`. The logarithm of this value is the least significant bit in the binary representation of `UNIT`."
+				}
+			},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/HotswapFactory_flattened.sol": "PreciseMath"
+		},
+		"evmVersion": "cancun",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/HotswapFactory_flattened.sol": {
+			"keccak256": "0x146746b9ae57f71dff13d9ba2c9f22bb40abce28427528c5298570d3acef346d",
+			"license": "BSD-3-Clause",
+			"urls": [
+				"bzz-raw://ca7a8ec324c8b1db9e306f5e59b02338a959f5e762b2237bda4ef7526c9bc3cb",
+				"dweb:/ipfs/QmWkgZE5eTu7dcEDepCH4xRbnCPFiXJ9QXZVi4yMGmUiB9"
+			]
+		}
+	},
+	"version": 1
+}

@@ -9,8 +9,11 @@
 pragma solidity ^0.8.25;
 
 import "./Ownable.sol";
+import "./libraries/SafeMath.sol";
 
 contract HotswapBase is Ownable {
+    using SafeMath for uint256;
+
     function _transferNative(
         address payable to,
         uint256 amount

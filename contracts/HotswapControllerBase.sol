@@ -36,7 +36,7 @@ contract HotswapControllerBase is HotswapPair {
         uint256 nNFT = _nft.balanceOf(_liquidity);
 
         uint256 nFFT = _normalize(fBalance, decimals);
-        nNFT = _normalize(nNFT, 18);
+        nNFT = _scaleUp(nNFT);
 
         if (nNFT > 0) {
             _price = _div(nFFT, nNFT);
@@ -55,6 +55,7 @@ contract HotswapControllerBase is HotswapPair {
         updatePrice();
     }
 
+    error NoReason(uint reason1, uint reason2);
     error DepositFailed();
     error InvalidWithdrawalRequest();
     error InsufficientLiquidity();
@@ -67,6 +68,14 @@ contract HotswapControllerBase is HotswapPair {
 
     function _div(uint256 num1, uint256 num2) internal pure returns (uint256) {
         return PreciseMath.div(num1, num2);
+    }
+
+    function _scaleUp(uint256 amount) internal pure returns (uint256) {
+        return amount * 1e18;
+    }
+
+    function _scaleDown(uint256 amount) internal pure returns (uint256) {
+        return amount / 1e18;
     }
 
     function _normalize(

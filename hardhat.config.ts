@@ -1,34 +1,49 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import { configDotenv } from "dotenv";
-require("hardhat-contract-sizer");
+import { boolean } from "hardhat/internal/core/params/argumentTypes";
+// require("hardhat-contract-sizer");
 
 configDotenv();
 
+const optimizerSettings = {
+  optimizer: {
+    enabled: true,
+    runs: 200,
+    details: { yul: false },
+  },
+}
+
+interface HardhatContractSizerConfig {
+  contractSizer: {
+    alphaSort?: boolean,
+    disambiguatePaths?: boolean,
+    runOnCompile?: boolean,
+    strict?: boolean,
+    only?: string[],
+  }
+}
+
 // TODO: API keys leaked. Changed during production
-const config: HardhatUserConfig = {
+const config: HardhatUserConfig & Partial<HardhatContractSizerConfig> = {
   solidity: {
     compilers: [
       {
         version: "0.8.25",
-
         settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-            details: { yul: false },
-          },
+          ...optimizerSettings
         }
-
+      },
+      {
+        version: "0.8.0",
+        settings: {
+          ...optimizerSettings
+        }
       },
       {
         version: "0.7.0",
         settings: {
-          optimizer: {
-            enabled: true,
-            runs: 1000,
-            details: { yul: false },
-          },
+          ...optimizerSettings
         }
       },
     ],
@@ -38,7 +53,6 @@ const config: HardhatUserConfig = {
     disambiguatePaths: false,
     runOnCompile: true,
     strict: true,
-    //only: [':ERC20$'],
   },
 
   //"0.8.25",

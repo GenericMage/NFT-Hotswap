@@ -1,0 +1,370 @@
+{
+	"compiler": {
+		"version": "0.8.25+commit.b61c2a91"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "controller",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "liquidity",
+						"type": "address"
+					}
+				],
+				"name": "HotswapDeployed",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "targetAddr",
+						"type": "address"
+					}
+				],
+				"name": "NativeTransferred",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "previousOwner",
+						"type": "address"
+					}
+				],
+				"name": "OwnershipRenounced",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "previousOwner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "OwnershipTransferred",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "controllers",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "nft",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "fft",
+						"type": "address"
+					}
+				],
+				"name": "deployHotswap",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "isOwner",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "liquids",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "renounceOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "controllerAddr",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "addr",
+						"type": "address"
+					}
+				],
+				"name": "setCollector",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "liquidityAddr",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "addr",
+						"type": "address"
+					}
+				],
+				"name": "setController",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "addr",
+						"type": "address"
+					}
+				],
+				"name": "setDefaultCollector",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "controllerAddr",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "factoryAddr",
+						"type": "address"
+					}
+				],
+				"name": "setFactory",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "transferOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/HotswapFactory.sol": "HotswapFactory"
+		},
+		"evmVersion": "cancun",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/HotswapBase.sol": {
+			"keccak256": "0x8a93fe9442a31665e11e583a71b656ce11b28a5eb60f222471ece4faedb2ff00",
+			"license": "BSD-3-Clause",
+			"urls": [
+				"bzz-raw://f3ec4f397b79a2668f3ea0622aa948a03fc53bef415486996a1c6b35de68cd53",
+				"dweb:/ipfs/QmcYvUihkrqTvRP64WLsgZSp3SV73G45A3e6PQjMAPSPME"
+			]
+		},
+		"contracts/HotswapController.sol": {
+			"keccak256": "0xa8bda3e79fc7ec1ec8c5705fc259264dc311f31de0c1ad28a5261f03739aaee4",
+			"license": "BSD-3-Clause",
+			"urls": [
+				"bzz-raw://b9bfbbd9917a1e344703fcbe199eaa6d4f794e4acb66c45681dd08b02276ec6a",
+				"dweb:/ipfs/QmbS53iRsFUUBWQw5dmJSa6XtS4kiF5oSntVm89btvS1zs"
+			]
+		},
+		"contracts/HotswapControllerBase.sol": {
+			"keccak256": "0x86ca879db79b20a1cddcd441c8c4f1439e1014ca2988cfe834377189cfb48d34",
+			"license": "BSD-3-Clause",
+			"urls": [
+				"bzz-raw://dd70e40e45575ec2622ba7d89bffd8adb56a4a6f3e53aebba1b401844f63b4ac",
+				"dweb:/ipfs/QmW65zJ77baYerS7y21mwrRgbQBAEBKhaPpn9H1EvG9gpv"
+			]
+		},
+		"contracts/HotswapFactory.sol": {
+			"keccak256": "0x24c0574cc15dd5f42c56531841a96fd1a70252900801c329e3fb97b6279144d4",
+			"license": "BSD-3-Clause",
+			"urls": [
+				"bzz-raw://3b91343caa3077dbca9c869db4665c13f46f3927d6f4e19403cde3f49ba20b44",
+				"dweb:/ipfs/QmNjWiy6XeG6SQ1GfG6yQztkvqE6zTMVdp2bRKPVcRLSFM"
+			]
+		},
+		"contracts/HotswapLiquidity.sol": {
+			"keccak256": "0x61169a7c1d785cc861c4874e55574f1ef717265bdb2a0cc51506dbfe014e27c3",
+			"license": "BSD-3-Clause",
+			"urls": [
+				"bzz-raw://bda69ae6ed35bfeab69d6725d128288f9a1f8d21bb41ccb87fc5e0f112561098",
+				"dweb:/ipfs/QmZ34AiL7pGq1RicGMw4YeqZtPkTd9e9Kgx1qf4E12CWEL"
+			]
+		},
+		"contracts/HotswapPair.sol": {
+			"keccak256": "0x6d16596f1ae30a38569c7b019e00a12fe2220b21c3d3838d138a988ff950571e",
+			"license": "BSD-3-Clause",
+			"urls": [
+				"bzz-raw://91f47d53e4fe0336139a5a300d2092775e722c3697c2b9a5d29de715d2b4ddc5",
+				"dweb:/ipfs/QmYpnkzZ3zx6RAt2ZjtsixV6m7R731CFbBS7v2tSZDnwfq"
+			]
+		},
+		"contracts/Ownable.sol": {
+			"keccak256": "0xcc71205c51e5c81c79dd5ff1e7023335e6115bdffa80bf2c7883feaf5c115748",
+			"license": "BSD-3-Clause",
+			"urls": [
+				"bzz-raw://2d3ea4eb2fedb86281f35c42ba7b15840de7840655ea4f22cca66b446b7b8705",
+				"dweb:/ipfs/QmUZ4Q2N7hQav8ojcxQE3nSmpGb4DB8evGgs3BH4YqmibD"
+			]
+		},
+		"contracts/interfaces/ERC20.sol": {
+			"keccak256": "0xc8415b1865e3b0d81f449e0a66d1d52d67373118a57fac519d6a6b51d4c52516",
+			"license": "BSD-3-Clause",
+			"urls": [
+				"bzz-raw://31e0ad7cc72a4adb0bb56667dac935a0f66d34affc0447be474c21feaa0650fe",
+				"dweb:/ipfs/QmfFNUFHgVFaoCXQhs6qYPyzmVScu5aViLY3yuN7Y2wBaw"
+			]
+		},
+		"contracts/interfaces/ERC721.sol": {
+			"keccak256": "0x7fdd5776be0441c63645de1fe8d4883f56a52f4c5b8bc336d3a4e09800449e53",
+			"license": "BSD-3-Clause",
+			"urls": [
+				"bzz-raw://a2dfb8832453095eb62f54451ace41683faec7d461964cbcc46b34bff6d693f9",
+				"dweb:/ipfs/QmfZTAvGw5qiRdDHrPpHVp5nbdRtc8rA9imNkAEDfVnAeV"
+			]
+		},
+		"contracts/libraries/PreciseMath.sol": {
+			"keccak256": "0x8e61b54ecd52a96012c8632c88cd36c31f2247b6767fcb37ae14725b1690d830",
+			"license": "BSD-3-Clause",
+			"urls": [
+				"bzz-raw://da13b40f641e607e1f9d6d3959dc16013cac46a829b2aecb5c657e274102f24f",
+				"dweb:/ipfs/QmWQtaLDDHfHmWxxRpD3DfnHb1ZnP743zu6PZvsaifATvr"
+			]
+		},
+		"contracts/libraries/SafeMath.sol": {
+			"keccak256": "0xfaeb0855195f1067cf27abea92dde9c7e2a1922e30adf668ad55f47579783066",
+			"license": "BSD-3-Clause",
+			"urls": [
+				"bzz-raw://440f4dfabcd4d9baef27326396e2425b1a86d17e7d5eef0203d0d8b9885890f7",
+				"dweb:/ipfs/Qmem7H1PQJgSLXHSk4hxYoPRKcenkrrDnoqyPbuvhLNzcV"
+			]
+		}
+	},
+	"version": 1
+}

@@ -51,7 +51,7 @@ async function main() {
 
   // const legacyController
 
-  await factory.deploymentTransaction();
+  await factory.deploymentTransaction()?.wait(6);
 
   const factoryAddr = await factory.getAddress();
 
