@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.5",
-    "dotenv-expand": "^11.0.6"
+    "dotenv-expand": "^11.0.6",
+    "hardhat-ethernal": "^3.2.5"
   }
 }

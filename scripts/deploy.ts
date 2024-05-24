@@ -4,6 +4,9 @@ import { configDotenv } from "dotenv";
 import { ContractTransaction, ContractTransactionReceipt, ContractTransactionResponse, ZeroAddress } from "ethers";
 import { ethers, run, network } from "hardhat";
 
+require('hardhat-ethernal');
+const hre = require("hardhat");
+
 async function extractDeployEvent(tx: ContractTransactionResponse) {
   const rcpt = await tx.wait();
   let controllerAddr = "";
@@ -79,6 +82,11 @@ async function main() {
     await run("verify:verify", {
       address: liquidity,
       constructorArguments: [ZeroAddress, ZeroAddress]
+    })
+  } else {
+    hre.ethernal.push({
+      name: "HotswapFactory",
+      address: factoryAddr
     })
   }
 }

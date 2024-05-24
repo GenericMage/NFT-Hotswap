@@ -3,6 +3,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import { configDotenv } from "dotenv";
 import { boolean } from "hardhat/internal/core/params/argumentTypes";
 // require("hardhat-contract-sizer");
+require('hardhat-ethernal');
 
 configDotenv();
 

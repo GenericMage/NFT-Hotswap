@@ -55,10 +55,14 @@ contract HotswapControllerBase is HotswapPair {
         updatePrice();
     }
 
-    error NoReason(uint reason1, uint reason2);
     error DepositFailed();
     error InvalidWithdrawalRequest();
     error InsufficientLiquidity();
+    error InsufficientSwapAmount();
+    error InvalidSwapPrice();
+
+    event Swap(uint256 nft, uint256 fft, address user);
+    event Fee(uint256 fee);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Math
@@ -70,12 +74,23 @@ contract HotswapControllerBase is HotswapPair {
         return PreciseMath.div(num1, num2);
     }
 
+    function _zerodiv(
+        uint256 num1,
+        uint256 num2
+    ) internal pure returns (uint256) {
+        return num2 > 0 ? PreciseMath.div(num1, num2) : 0;
+    }
+
     function _scaleUp(uint256 amount) internal pure returns (uint256) {
         return amount * 1e18;
     }
 
     function _scaleDown(uint256 amount) internal pure returns (uint256) {
         return amount / 1e18;
+    }
+
+    function _rescale(uint256 amount) internal pure returns (uint256) {
+        return _scaleDown(_scaleUp(amount));
     }
 
     function _normalize(
