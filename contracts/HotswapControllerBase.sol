@@ -60,9 +60,11 @@ contract HotswapControllerBase is HotswapPair {
     error InsufficientLiquidity();
     error InsufficientSwapAmount();
     error InvalidSwapPrice();
+    error NoReason(uint256 a, uint256 b);
 
     event Swap(uint256 nft, uint256 fft, address user);
     event Fee(uint256 fee);
+    event FeeClaimed(address user, uint256 amount);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Math

@@ -64,6 +64,8 @@ contract HotswapBase is Ownable {
         uint256 fftAlloc;
         bool claimed;
         uint256 userIndex;
+        bool initialKind;
+        uint256 initialAlloc;
     }
 
     struct LiquidData {
