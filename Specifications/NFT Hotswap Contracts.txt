@@ -45,8 +45,6 @@ Contract is ownable.
 
 Swap determines price, withdraws stated number of tokens or NFTs, then pays out settlement based on price. 
 
-Any excess units of [FFT] in the contract are assumed to be fees. 
-
 Functions ;
 
 - getPrice ;
@@ -68,27 +66,44 @@ Determines where collector fees are sent to (ownerOnly).
 Returns the collector address. 
 
 - depositNFT ;
-Creates a liquidity slot entry for the address and deposits the stated number of NFTs. 
+Creates a liquidity slot entry for the address and deposits the stated number of NFTs.
 
 - depositFFT ;
-Similar to "depositNFT" but for FFT.
+Creates a liquidity slot entry for the address and deposits the stated number of FFT.
+ 
+When "deposit" is called the contract gets the ratios for the liquidity slot using the following formula;
+
+FFT deposit / impact FFT amount = FFT ratio
+
+NFT deposit / impact NFT amount = NFT ratio
+
+"impact Amount" is how much FFT or NFT will be in the contract after the function executes. 
+
+Example; if there's "0" and the user is depositing 500, the impact amount is 500.
+
 
 - claimFees ;
 Claims fees on a target liquidity slot owned by the caller. 
 
 - withdraw ;
-Withdraws a pairing of NFT and FFT based on how much the caller is owed and the skew.
+Withdraws a pairing of NFT and FFT based on how much the caller is owed.
+When the user calls "withdrawLiquidity" the contract calculates the following before paying out; 
+
+Current FFT Liquidity * FFT ratio = output amount
+
+Current NFT Liquidity * NFT ratio = output amount
+
 
 - liquidityAddress; 
 Set during deployment by the factory, determines where NFT items and FFT units are withdrawn / deposited to for swap or liquidity functions. 
 
 ! Liquidity Slots !
-Each controller has storages for liquidity, these manage allocations of [NFT] and [FFT] stored under 'xLiquid' and 'yLiquid', users can add to these balances by using function 'depositNFT' and depositFFT' respectively. Each time a user deposits; their details get written to 1/10000 'liquidity slots', each liquidity slot holds the following details;
+Each controller has storages for liquidity, these manage allocations of [NFT] and [FFT] stored under 'xLiquid' and 'yLiquid', users can add to these balances by using function 'deposit'. Each time a user deposits; their details get written to 1/10000 'liquidity slots', each liquidity slot holds the following details;
 
 depositor : (address)
 deposited at : (uint256)
-deposit type : (bool)
-Price : (uint256)
+FFT Ratio : (uint256)
+NFT Ratio : (unit256)
 xAllocation : (uint256)
 yAllocation : (uint256)
 claimed : (bool)
@@ -96,13 +111,11 @@ index : (uint256)
 
 "deposited at" stores the block height when the deposit was made, this is essential for calculating the depositor's fee allocation. 
 
-"deposit type" defines if the depositor deposited [NFT] or [FFT]
+"NFT Ratio" stores how much of the pool's NFT balance the depositor is entitled to. 
 
-"Price" stores the price at the time the Liquidity was added, this is necessary for determining how much they are owed once they attempt to withdraw [See E1].
+"FFT Ratio" stores how much of the pool's FFT balance the depositor is entitled to.
 
 "Allocations" show how much was originally deposited by the address, this is necessary for calculating how much they are owed once they attempt to withdraw. 
-
-When a user attempts to withdraw, the contract checks the "skew", this is the ratio of [NFT] to [FFT] in the xLiquid and yLiquid balances, it then splits the user's allocation by that ratio and attempts to pay out their balance in [FFT] and [NFT] at current price [See E1]. 
 
 The controller stores additional details such as; 
 
@@ -136,7 +149,7 @@ Functions;
 
 - queryLiquidity; returns the full Liquidity contract details excluding Liquidity slots. 
 
-# NFT Hotswap factory 
+! NFT Hotswap factory ! 
 Deploys new hotswap controllers and hotswap LP contracts, this uses a stated ERC-20 address and ERC-721 address provided by the deployer. Fee collector is predefined into each controller/LP but can be changed by the owner, all deployed hotswaps are owned by the factory, can push transaction to change collector address on a hotswap or transfer ownership of a liquidity contract to a new controller. 
 
 Functions ; 
@@ -158,39 +171,14 @@ Transfers ownership of the contract to a target address.
 - setDefaultCollector ;
 Determines the collector address set into controllers by default, also determines where LP creation fees are sent. 
 
-! Wrapped Plebbit !
-A simple interchain token built using Axelar. 
-
 /// Examples /// 
-
-E1 : If a user deposited 1000 [FFT] but at the time of withdrawal there is 2000 [FFT] to 1500 [NFT] in the x and y liquid, the contract calculates; 
-
-2000 + 1500 = 3500, 
-then 3500 / 2000 = 1.75 
-then 3500 / 1500 = 2.333333333333333333
-
-The contract then divides the deposited amount by the ratios of the previous procedure as;
-
-1000 / 1.75 = 571.428571428571428571
-1000 / 2.333333333333333333 = 428.571428571428571489
-
-Therefore the user is owed 571.428571428571428571 [FFT] and 428.571428571428571489 [FFT] worth of [NFT]. 
-
-The contract then calculates the Liquidity slot's [NFT] price against the amount owed, assuming the NFT price was "5" at the time of deposit, the contract calculates;
-
-428.571428571428571489 / 5 = 85.714285714285714297
-
-Thus what the user receives at the end of the transaction is 571.428571428571428571 [FFT] and 86 [NFT] with nearest number rounding.
-
-Note; this calculates using x and y liquid, not the contract's total balance. 
- 
 E2: If the xLiquid is 1000, and there are (4) users who respectively contributed 250 each, meanwhile there is 10 [FFT] in the "Fees" balance, this means each user is eligible for up to 2.5 [FFT] this is based on their percent of the pool. However, the (4) users added liquidity at different times.
 In this examples they added as follows; 
 
 User-A : 10 hours ago, 
 User-B : 5 hours ago, 
 User-C : 2.5 hours ago, 
-User-D : 1.25 hours ago, k
+User-D : 1.25 hours ago, 
 
 The contract sums their times as; 18.75, if the lowest attempted to withdraw, their weighted duration limits how much they can claim, this is 1.25 / 18.75 * 100 = 6.666666666666666666%. 
 
