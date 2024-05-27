@@ -65,8 +65,12 @@ Determines where collector fees are sent to (ownerOnly).
 - collector ;
 Returns the collector address. 
 
-- deposit ;
-Creates a liquidity slot entry for the address and deposits the stated number of NFTs and FFTs. 
+- depositNFT ;
+Creates a liquidity slot entry for the address and deposits the stated number of NFTs.
+
+- depositFFT ;
+Creates a liquidity slot entry for the address and deposits the stated number of FFT.
+ 
 When "deposit" is called the contract gets the ratios for the liquidity slot using the following formula;
 
 FFT deposit / impact FFT amount = FFT ratio
