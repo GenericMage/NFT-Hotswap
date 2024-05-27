@@ -4,8 +4,6 @@ A frontend application for 'Dexhune : NFT Hotswap'.
 ! General !
 The app allows users to insert a hotswap LP address and either swap for it - add liquidity - claims fees on liquidity positions or withdraw their liquidity. 
 
-The Plebbit token (PLEB) is set as a default, the app fetches the prices of PLEB - Exo's Bagholders NFT (xPLEB) and the bridged version of Plebbit Token (wPLEB). Using this information to present the relative prices of PLEB and wPLEB, thus facilitating arbitrage. 
-
 ! Page 1 !
 1a ;  Wallet connect
 
@@ -24,7 +22,7 @@ Text link that says "Factory".
 
 1g ; Trade menu.
 
-1h ; PLEB price comparison ;
+1h ; price ;
 Calculates the value of the NFT in FFT by fetching the amounts of both in the LP. 
 
 Example; there is 10,000,000 FFT and 10 NFT in the LP, (FFT amount) / (NFT amount) = 1,000,000. 
@@ -35,20 +33,30 @@ Allows the user to state a number of NFTs to buy or sell.
 1j ; Buy/sell toggle ;
 Determines if the swap is for buy or sell.
 
-1k ; Cost/settlement display ;
+1k ; slippage field ; 
+determines how much is set in "minOutput" or "maxInput" in 1m. 
+
+1l ; Cost/settlement display ;
 Shows how much [FFT] the swap will cost or settle. 
 
-1l ; Swap button ;
+1m ; Swap button ;
 (Presents a popup to approve the NFT or FFT for trade if not already approved)
 Pushes a transaction to execute the swap with the stated details. 
 
-1m ; Liquidity menu button ;
+Slippage setting is determined as; 
+amount * price = swap cost
+swap cost / 100 * slippage = delta
+swap cost + delta =  maxInput or minOutput. 
+
+"slippage" is the number set in the slippage field on 1k.
+
+1n ; Liquidity menu button ;
 Presents Page 2.
 
-1n ; Listing Menu ; 
+1o ; Listing Menu ; 
 Presents page 4.
 
-1o ; close button ; 
+1p ; close button ; 
 Closes the trade menu.
 
 
