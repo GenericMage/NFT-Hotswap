@@ -128,8 +128,6 @@ Fees : ##
 "yLiquid" stores how much [FFT] is in the contract and can be used to settle buy swaps. 
 
 "Fees" stores how much [FFT] has been taken from fees, this segregates the yLiquid from fees. 
- 
-Fee calculations are time weighted based on percent contributed to the total liquid balance, and occurs whenever "claimFees" is called. [See E2].
 
 The "claimed" field is used to indicate if a user has claimed their fees or not, once set to "true" they can no longer claim, they can only withdraw their liquidity. 
 If a user does not claim before withdrawing, then their fees are forfeit. 
