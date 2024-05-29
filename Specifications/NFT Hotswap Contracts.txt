@@ -143,7 +143,7 @@ tVolume : (uint256)
 
 "yLiquid" stores how much [FFT] is in the contract and can be used to settle buy swaps. 
 
-"Fees" stores how much [FFT] has been taken from fees, this segregates the yLiquid from fees. 
+"Fees" stores how much [FFT] has been taken from fees, this segregates the yLiquid from fees [See E6].
  
 "tVolume" indicates how much volume in FFT has been done by the listing contract, is updated after every buy/sell. This amount is acquired by the following formula; 
 
@@ -212,6 +212,10 @@ Meaning the price the exchange fetches would actually be 5 [FFT] and not 5.05.
 This means the buyer makes no profit from trading with themselves and in fact loses due to fees. 
 
 E5 : same as E4 but after the first user buys; any number of users then also buy the NFT, driving the price up by 10%, now the price is 5.55 [FFT]. When the user attempts to sell; the price they sell at is 5.4945 [FFT] due to impact/delta. Thus they made profit at the expense of the other buyer(s). 
+
+E6 : when a swap is triggered the contract fetches the amounts of FFT and NFT, if there is 1000 FFT in the contract it first subtracts the amount stored as fees, if fees are 1.5 FFT then the total available for swaps is; 998.5 FFT. 
+
+Likewise if the user triggered a deposit or withdrawal, the total FFT Liquidity is subtracted by fees. 
 
 /// Links ///
 L1 : https://ethereum.stackexchange.com/questions/27991/how-do-you-verify-a-contract-on-etherscan-that-is-deployed-by-another-contract/109636#109636
