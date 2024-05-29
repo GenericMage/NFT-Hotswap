@@ -1,215 +1,100 @@
-///  Premise ///
-An NFT liquidity protocol based on CF/CP 
+/// Premise ///
+A frontend application for 'Dexhune : NFT Hotswap'. 
 
-/// General ///
-The System is made up of (3) contracts; NFT Hotswap Factory, NFT Hotswap Controller, and NFT Hotswap Liquidity. 
+! General !
+The app allows users to insert a hotswap LP address and either swap for it - add liquidity - claims fees on liquidity positions or withdraw their liquidity. 
 
-/// Hotswap Liquidity ///
-This contract holds [NFT] items and [FFT] units for the listed tokens, allows an owner/controller to withdraw tokens from it, thereby enabling swaps. 
-The controller can transfer ownership, thereby allowing the existing controller to be updated. Controllers are owned by the hotswap factory, both controllers and liquidity contracts are created by the factory.  
+! Page 1 !
+1a ;  Wallet connect
 
-Functions; 
+1b ;  DXH Logo 
 
-- withdraw ; used by the owner/controller to move [FFT] or [NFT] out of the Liquidity contract to a recipient. 
+1c ; Address field ;
+Allows the user to insert a listing address to interact with. 
 
-- FFT ; returns the stored FFT contract address. 
+1d ; Add button ; 
+Begins interacting with the stated listing address.
 
-- NFT ; returns the stored NFT contract address. 
+1e ; Factory Contract Link ;
+Text link that says "Factory". 
 
+1f ; Github link
 
-/// Hotswap Controller ///
-This contract lets users pair NFTs and FFTs (Float-enabled fungible tokens) using CF/CP. The NFT collection and FFT token are set as constructor arguments. 
-Swaps are instant and exchange a stated amount of NFT for a determined amount of FFT. That is; the user specifies how many NFT items they want to buy or sell, the hotswap then determines how much it would cost or yield then executes the swap.
+1g ; Trade menu.
 
-Price is derived by pairing, this uses CF/CP to determine the relative amounts of two tokens in the liquidity contract, with provision for delta on sells. 
+1h ; price ;
+Calculates the value of the NFT in FFT by fetching the amounts of both in the LP. 
 
-Example; if there are 1000 units of [FFT] and 10 items of [NFT], then the hotswap calculates; 1000 / 10 =  100, which means 100 [FFT] is equal to 1 [NFT]. 
+Example; there is 10,000,000 FFT and 10 NFT in the LP, (FFT amount) / (NFT amount) = 1,000,000. 
 
-If buys are concerned the hotswap determines a price then deducts [FFT] from the caller's address and sends them [NFT] items from itself at the determined price. 
+1i; Amount Field ;
+Allows the user to state a number of NFTs to buy or sell. 
 
-With sells the hotswap determines the price post impact then deducts a stated number of NFT items from the caller's address and sends them [FFT] units at the post impact price [See E4 & E5].
+1j ; Buy/sell toggle ;
+Determines if the swap is for buy or sell.
 
-NFT Items need to be queried differently from FFT units, when a transfer involving NFTs is concerned the hotswap queries the listed NFT contract for the target address's items, then concurrently creates multiple 'safeTransferFrom' transactions for each item the user owns up to the number stated, this happens within the same transaction. If the user does not have up to the number they stated the transaction fails. 
+1k ; slippage field ; 
+determines how much is set in "minOutput" or "maxInput" in 1m. 
 
-Users cannot trade in fractions of an NFT because NFTs have no decimals. 
+1l ; Cost/settlement display ;
+Shows how much [FFT] the swap will cost or settle. 
 
-The listed [FFT] and [NFT] are stored in balances of x and y. When a swap occurs or specific liquidity is added this updates said balances, any amount of [FFT] not in y balance is automatically added to the fee storage. 
+1m ; Swap button ;
+(Presents a popup to approve the NFT or FFT for trade if not already approved)
+Pushes a transaction to execute the swap with the stated details. 
 
-Hotswap takes fees at 0.05% per swap, fees have a specific storage. 1/5 of all fees are immediatly sent to a "collector" address, while the rest is added to the fee storage and held within the hotswap.
+Slippage setting is determined as; 
+amount * price = swap cost
+swap cost / 100 * slippage = delta
+swap cost + delta =  maxInput or minOutput. 
 
-Current price is stored and queryable.  
+"slippage" is the number set in the slippage field on 1k.
 
-Liquidity can be added, yielding fees for the depositor. 
+1n ; Liquidity menu button ;
+Presents Page 2.
 
-Contract is ownable.
+1o ; Listing Menu ; 
+Presents page 4.
 
-Swap determines price, withdraws stated number of tokens or NFTs, then pays out settlement based on price.
+1p ; close button ; 
+Closes the trade menu.
 
-Functions ;
 
-- getPrice ;
-Calculates and stores a price. Is triggered within a swap transaction before and after settlement. 
+! Page 2 ! 
 
-- price ;
-Returns the latest price, updated after every swap. 
+2a ; Liquidity menu
 
-- swapNFT ; 
-Executes a transaction to swap a stated number of NFT items at the determined price in exchange for FFT units (Sell). Requires "minOutput" field to determine the minimum amount the contract is allowed to pay out, if the payout amount is equal to or greater than the stated minOutput then the transaction goes through. 
+2b ; Amount field 
 
-- swapFFT ;
-Similar to "swapNFT" but states a number of NFT items to acquire from the contract in exchange for FFT units that the caller owns (Buy). Requires "maxInput" field to determine the maximum amount the contract is allowed to take, if the expected "take" is equal to or lesser than the stated maxInput then the transaction goes through. 
+2c ; FFT or NFT toggle ; 
+Determines if the user is depositing the target NFT or FFT in the listing. 
 
-- setCollector ;
-Determines where collector fees are sent to (ownerOnly). 
+2d ; Deposit button ; 
+Pushes a transaction for a deposit using the details provided. 
 
-- collector ;
-Returns the collector address. 
+2e ; Positions panel ; 
+Returns all liquidity positions the user has, first shows the amount, if greater than 99999 then it displays as 1.0e5. Shows the token ticker up to 4 letters, more than 4 is displayed as "XXXX...". Lasting it displays the amount of fees collected and unclaimed, if claimed this returns "N/A". 
 
-- depositNFT ;
-Creates a liquidity slot entry for the address and deposits the stated number of NFTs.
+2f ; Withdraw button ;
+Pushes a transaction to withdraw the target liquidity position. 
 
-- depositFFT ;
-Creates a liquidity slot entry for the address and deposits the stated number of FFT.
- 
-When "deposit" is called the contract gets the ratios for the liquidity slot using the following formula;
+2g ; Claim fees button ;
+Pushes a transaction to claim fees on a given liquidity position. 
 
-FFT deposit / impact FFT amount = FFT ratio
+2h ; scroll bar
 
-NFT deposit / impact NFT amount = NFT ratio
+2i ; Close button (returns the user to the main menu)
 
-"impact Amount" is how much FFT or NFT will be in the contract after the function executes. 
+! Page 3 ! 
+3a ; Listing menu
 
-Example; if there's "0" and the user is depositing 500, the impact amount is 500.
+3b ; NFT Address 
 
+3c ; FFT Address 
 
-- claimFees ;
-Claims fees on a target liquidity slot owned by the caller. Uses the following formula; 
+3d ; List button
 
-tVolume - dVolume = cVolume 
+3e ; close button
 
-cVolume / 100 * 0.05 = fees accrued 
-
-NFT or FFT Alloc (selects based on deposit type) / Total FFT or NFT Liquidity (selects based on deposit type) = Liquidity contribution 
-
-fees accrued * liquidity contribution = output amount
-
-
-- withdraw ;
-Withdraws a pairing of NFT and FFT based on how much the caller is owed.
-When the user calls "withdrawLiquidity" the contract calculates the following before paying out; 
-
-Current FFT Liquidity * FFT ratio = output amount
-
-Current NFT Liquidity * NFT ratio = output amount
-
-
-- liquidityAddress; 
-Set during deployment by the factory, determines where NFT items and FFT units are withdrawn / deposited to for swap or liquidity functions. 
-
-! Liquidity Slots !
-Each controller has storages for liquidity, these manage allocations of [NFT] and [FFT] stored under 'xLiquid' and 'yLiquid', users can add to these balances by using function 'deposit'. Each time a user deposits; their details get written to 1/10000 'liquidity slots', each liquidity slot holds the following details;
-
-depositor : (address)
-deposited at : (uint256)
-FFT Ratio : (uint256)
-NFT Ratio : (unit256)
-dVolume : (unit256)
-xAllocation : (uint256)
-yAllocation : (uint256)
-claimed : (bool)
-index : (uint256)
-
-"deposited at" stores the block height when the deposit was made, this is essential for calculating the depositor's fee allocation. 
-
-"NFT Ratio" stores how much of the pool's NFT balance the depositor is entitled to. 
-
-"FFT Ratio" stores how much of the pool's FFT balance the depositor is entitled to.
-
-"dVolume" stores the tVolume value at the time the deposit was made and is necessary for claiming fees. 
-
-"Allocations" show how much was originally deposited by the address, this is necessary for calculating how much they are owed once they attempt to withdraw. 
-
-The "claimed" field is used to indicate if a user has claimed their fees or not, once set to "true" they can no longer claim, they can only withdraw their liquidity. 
-If a user does not claim before withdrawing, then their fees are forfeit. 
-
-The controller stores additional details such as; 
-
-xLiquid : (uint256)
-yLiquid : (uint256) 
-Fees : (uint256)
-tVolume : (uint256)
-
-"xLiquid" stores how much [NFT] is in the contract and can be used to settle sell swaps.
-
-"yLiquid" stores how much [FFT] is in the contract and can be used to settle buy swaps. 
-
-"Fees" stores how much [FFT] has been taken from fees, this segregates the yLiquid from fees. 
- 
-Fee calculations are time weighted based on percent contributed to the total liquid balance, and occurs whenever "claimFees" is called. 
-
-"tVolume" indicates how much volume in FFT has been done by the listing contract, is updated after every buy/sell. This amount is acquired by the following formula; 
-
-FFT amount swapped + current volume = new volume
-
-"tVolume" is also important to the function 'claimFees'. 
-
-Fees are deducted upon each transaction, altering the FFT payout or initial swap principal and diverting the deducted amount into the token's "fees" balance [See E3].
-
-Functions;
-- queryLiquidbyIndex ; returns the details of a liquidity slot based on the total index. 
-
-- queryLiquidbyDepositor ; returns the details of a Liquidity slot based on the depositor, requires index number and address.
-
-- queryLiquid; requires "isFFT" (bool), returns the amount of [NFT] or [FFT] currently in x or y Liquid. 
-
-- queryPositions; requires "address", returns the liquidity slot numbers for a particular address. 
-
-- queryPositionbyIndex; requires a number, returns the full details of a liquidity slot, i.e the amount of [FFT] and [NFT] in the slot, who owns the slot, fees owed etc. 
-
-- queryLiquidity; returns the full Liquidity contract details excluding Liquidity slots. 
-
-! NFT Hotswap factory ! 
-Deploys new hotswap controllers and hotswap LP contracts, this uses a stated ERC-20 address and ERC-721 address provided by the deployer. Fee collector is predefined into each controller/LP but can be changed by the owner, all deployed hotswaps are owned by the factory, can push transaction to change collector address on a hotswap or transfer ownership of a liquidity contract to a new controller. 
-
-Functions ; 
-- deployHotswap
-Requires ERC-20 and ERC-721 addresses, creates new hotswap controller and LP. Charges "payable" of (0.001) MATIC which is sent to the collector address. 
-
-- setCollector 
-Changes the collector address on a hotswap controller.  
-
-- setController
-Changes the controller for a liquidity address, thereby updating it. 
-
-- setFactory
-Changes the ownership of a controller and LP address. 
-
-- transferOwnership ; 
-Transfers ownership of the contract to a target address.
-
-- setDefaultCollector ;
-Determines the collector address set into controllers by default, also determines where LP creation fees are sent. 
-
-/// Examples /// 
-E1 :
-
-E2: 
-
-E3 : if a user attempted to buy 10 [NFT] at a price of (2); liquidity fees will result in them being charged 20 FFT for the swap and; 20 * 100 / 0.05 = 0.01 as fees, so 20.01 FFT in total while settling them 10 [NFT]. Of the fees collected 0.002 is sent to the collector while 0.008 is held within the fees storage. 
-
-If the user was selling rather than being settled 20 FFT they are instead settled 19.99 FFT while the rest goes to fess same as the previous paragraph. 
-
-E4 : a buy swap is made for an NFT, At the time the swap is made the price is 5 [FFT], the user's order is accepted at 5 [FFT]. Their order increases the price by 1%. 
-
-With the price now at 5.05 [FFT] when the user attempts to sell; their swap is accepted but the price and output amount are not yet determined. When the swap is triggered the LP adds/subtracts whatever amount is being exchanged to/from the x and y liquid, thereby getting the post impact price i.e the price *after* the swap occurs. 
-
-Then finally paying out the final settlement amount to the seller. 
-
-Meaning the price the exchange fetches would actually be 5 [FFT] and not 5.05.
-This means the buyer makes no profit from trading with themselves and in fact loses due to fees. 
-
-E5 : same as E4 but after the first user buys; any number of users then also buy the NFT, driving the price up by 10%, now the price is 5.55 [FFT]. When the user attempts to sell; the price they sell at is 5.4945 [FFT] due to impact/delta. Thus they made profit at the expense of the other buyer(s). 
-
-
-/// Notes ///
-- Initial collector will be a personal multi-sig, but will be changed to MarkerDAO later on. 
+/// Notes /// 
+Functions like "swap" and "deposit" will require a popup that triggers "approve" (if FFT) or "setApprovalForAll" (if NFT). 
