@@ -104,6 +104,7 @@ Current FFT Liquidity * FFT ratio = output amount
 
 Current NFT Liquidity * NFT ratio = output amount
 
+The amount a Liquidity provider is entitled to withdraw cannot be greater than the amount they initially deposited. If the output is greater it will default to their deposited amount instead. 
 
 - liquidityAddress; 
 Set during deployment by the factory, determines where NFT items and FFT units are withdrawn / deposited to for swap or liquidity functions. 
