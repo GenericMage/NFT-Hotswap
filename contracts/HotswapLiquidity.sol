@@ -44,8 +44,8 @@ contract HotswapLiquidity is HotswapPair {
         uint256 tokenId;
         bytes memory data = new bytes(0);
 
-        for (uint256 i = 0; i < amount; i++) {
-            tokenId = _nft.tokenOfOwnerByIndex(address(this), i);
+        for (uint256 i = amount; i > 0; i--) {
+            tokenId = _nft.tokenOfOwnerByIndex(address(this), i - 1);
             _nft.safeTransferFrom(address(this), dest, tokenId, data);
         }
 
@@ -58,4 +58,5 @@ contract HotswapLiquidity is HotswapPair {
 
     event WithdrawNFT(uint256 amount, address addr);
     event WithdrawFFT(uint256 amount, address addr);
+    error NoReason(uint256 a, uint256 b);
 }

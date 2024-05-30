@@ -20,9 +20,13 @@ contract HotswapControllerBase is HotswapPair {
 
     uint256 public _price;
     mapping(uint8 => uint256) private _scalars;
-    mapping(address => uint256[]) internal _liquidityByUser;
 
-    Liquid[] public _liquids;
+    mapping(address => uint256[]) internal _nftUserLiquid;
+    mapping(address => uint256[]) internal _fftUserLiquid;
+
+    Liquid[] public _nftLiquids;
+    Liquid[] public _fftLiquids;
+
     uint256 public _fees;
 
     HotswapLiquidity internal _liq;
@@ -31,16 +35,19 @@ contract HotswapControllerBase is HotswapPair {
         _collector = msg.sender;
     }
 
+    function nftLiquidity() public view returns (uint256) {
+        return _liq.nftBalance();
+    }
+
+    function fftLiquidity() public view returns (uint256) {
+        return _liq.fftBalance();
+    }
+
     function updatePrice() public returns (uint256) {
-        uint256 fBalance = _fft.balanceOf(_liquidity);
-        uint256 nNFT = _nft.balanceOf(_liquidity);
+        uint256 nft = _scaleUp(nftLiquidity());
+        uint256 fft = _normalize(fftLiquidity());
 
-        uint256 nFFT = _normalize(fBalance, decimals);
-        nNFT = _scaleUp(nNFT);
-
-        if (nNFT > 0) {
-            _price = _div(nFFT, nNFT);
-        }
+        _price = _zerodiv(fft, nft);
 
         return _price;
     }
@@ -54,17 +61,6 @@ contract HotswapControllerBase is HotswapPair {
         _liq = HotswapLiquidity(addr);
         updatePrice();
     }
-
-    error DepositFailed();
-    error InvalidWithdrawalRequest();
-    error InsufficientLiquidity();
-    error InsufficientSwapAmount();
-    error InvalidSwapPrice();
-    error NoReason(uint256 a, uint256 b);
-
-    event Swap(uint256 nft, uint256 fft, address user);
-    event Fee(uint256 fee);
-    event FeeClaimed(address user, uint256 amount);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Math
@@ -95,17 +91,11 @@ contract HotswapControllerBase is HotswapPair {
         return _scaleDown(_scaleUp(amount));
     }
 
-    function _normalize(
-        uint256 amount,
-        uint8 decimals
-    ) internal returns (uint256) {
+    function _normalize(uint256 amount) internal returns (uint256) {
         return decimals == 1 ? amount : amount * _computeScalar(decimals);
     }
 
-    function _denormalize(
-        uint256 amount,
-        uint8 decimals
-    ) internal returns (uint256) {
+    function _denormalize(uint256 amount) internal returns (uint256) {
         return decimals == 1 ? amount : amount / _computeScalar(decimals);
     }
 
@@ -117,6 +107,65 @@ contract HotswapControllerBase is HotswapPair {
                 _scalars[decimals] = scalar = 10 ** (18 - decimals);
             }
         }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Data Structures
+    struct Liquid {
+        uint256 userIndex;
+        uint256 price;
+        address depositor;
+        uint256 depositedAt;
+        uint256 alloc;
+        uint256 allocRatio;
+        uint256 dVolume;
+        bool kind;
+        bool claimed;
+    }
+
+    struct LiquidData {
+        address depositor;
+        uint256 depositedAt;
+        uint256 price;
+        uint256 alloc;
+        bool kind;
+        bool claimed;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Events and Errors
+    event Swap(uint256 nft, uint256 fft, address user);
+    event Fee(uint256 fee);
+    event FeeClaimed(address user, uint256 amount);
+
+    error DepositFailed();
+    error InvalidWithdrawalRequest();
+    error InsufficientLiquidity();
+    error InsufficientSwapAmount();
+    error InvalidSwapPrice();
+    error NoReason(uint256 a, uint256 b);
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Util
+    function _removeItem(
+        Liquid[] storage arr,
+        uint256 index
+    ) internal returns (bool) {
+        uint256 last = arr.length - 1;
+        bool isLast = index == last;
+
+        if (!isLast) {
+            arr[index] = arr[last];
+        }
+
+        arr.pop();
+        return !isLast;
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }

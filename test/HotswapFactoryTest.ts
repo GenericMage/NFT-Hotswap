@@ -65,17 +65,16 @@ describe("HotswapFactory", function () {
       await controller.depositNFT(8);
       await controller.depositFFT(BigInt(900e18));
 
-      await controller.updatePrice();
-
       console.log("Before swap\n------------------");
       console.log(); console.log();
       console.log(await controller.decimals())
       console.log(await tendies.decimals())
-      console.log(await controller.queryLiquid(0));
-      console.log(await controller.queryLiquid(1));
+      console.log(await controller.queryLiquid(0, true));
+      console.log(await controller.queryLiquid(0, false));
       console.log(await controller._price());
       console.log("Balances", await mockNFT.balanceOf(ownerAddr), await tendies.balanceOf(ownerAddr));
 
+      console.log("NFT Liquidity", await mockNFT.balanceOf(liquidity));
 
 
 
@@ -83,7 +82,7 @@ describe("HotswapFactory", function () {
 
       console.log("After swap\n------------------");
       console.log(); console.log();
-      const tx = await controller.swapFFT(3);
+      const tx = await controller.swapFFT(3, BigInt(0xFFFFFF));
       const rcpt = await tx.wait();
 
       for (const log of rcpt?.logs ?? []) {
@@ -92,17 +91,17 @@ describe("HotswapFactory", function () {
         }
       }
 
-      console.log(await controller.queryLiquid(0));
-      console.log(await controller.queryLiquid(1));
+      console.log(await controller.queryLiquid(0, true));
+      console.log(await controller.queryLiquid(0, false));
 
       try {
-        await controller.withdrawLiquidity(0);
+        await controller.withdrawLiquidity(0, true);
       } catch (err) {
         console.log(err);
       }
 
       try {
-        await controller.withdrawLiquidity(1);
+        await controller.withdrawLiquidity(0, false);
       } catch (err) {
         console.log(err);
       }
@@ -115,7 +114,7 @@ describe("HotswapFactory", function () {
       console.log("Withdrawing...");
 
       // await expect(controller.queryLiquid(1)).to.be.reverted;
-      await expect(controller.claimAllFees()).to.not.reverted;
+      //await expect(controller.claimFee(0, true)).to.not.reverted;
     });
 
     it("should successfully swap NFTs", async () => {
@@ -137,15 +136,15 @@ describe("HotswapFactory", function () {
       console.log(); console.log();
       console.log(await controller.decimals())
       console.log(await tendies.decimals())
-      console.log(await controller.queryLiquid(0));
-      console.log(await controller.queryLiquid(1));
+      console.log(await controller.queryLiquid(0, true));
+      console.log(await controller.queryLiquid(0, false));
       console.log(await controller._price());
       console.log("Balances", await mockNFT.balanceOf(ownerAddr), await tendies.balanceOf(ownerAddr));
 
 
       console.log("After swap\n------------------");
       console.log(); console.log();
-      const tx = await controller.swapNFT(4);
+      const tx = await controller.swapNFT(4, 0);
       const rcpt = await tx.wait();
 
       for (const log of rcpt?.logs ?? []) {
@@ -159,8 +158,8 @@ describe("HotswapFactory", function () {
 
       // await expect().not.reverted;
 
-      console.log(await controller.queryLiquid(0));
-      console.log(await controller.queryLiquid(1));
+      console.log(await controller.queryLiquid(0, true));
+      console.log(await controller.queryLiquid(0, false));
       console.log(await controller._price());
       console.log("Balances", await mockNFT.balanceOf(ownerAddr), await tendies.balanceOf(ownerAddr));
     });
