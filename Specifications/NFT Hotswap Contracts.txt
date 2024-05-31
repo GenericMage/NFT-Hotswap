@@ -29,6 +29,13 @@ If buys are concerned the hotswap determines a price then deducts [FFT] from the
 
 With sells the hotswap determines the price post impact then deducts a stated number of NFT items from the caller's address and sends them [FFT] units at the post impact price [See E4 & E5].
 
+The formula for impact price is as follows; 
+
+NFT swap amount * price = FFT output 
+FFT Liquidity - FFT output = FFT impact 
+NFT Liquidity + NFT swap amount = NFT impact 
+FFT impact / NFT impact = impact price 
+
 NFT Items need to be queried differently from FFT units, when a transfer involving NFTs is concerned the hotswap queries the listed NFT contract for the target address's items, then concurrently creates multiple 'safeTransferFrom' transactions for each item the user owns up to the number stated, this happens within the same transaction. If the user does not have up to the number they stated the transaction fails. 
 
 Users cannot trade in fractions of an NFT because NFTs have no decimals. 
