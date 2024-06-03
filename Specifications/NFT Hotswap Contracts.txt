@@ -96,7 +96,7 @@ Claims fees on a target liquidity slot owned by the caller. Uses the following f
 
 tVolume - dVolume = cVolume 
 
-cVolume / 100 * 0.05 = fees accrued 
+cVolume / 100 * 0.04 = fees accrued 
 
 NFT or FFT Alloc (selects based on deposit type) / Total FFT or NFT Liquidity (selects based on deposit type) = Liquidity contribution 
 
