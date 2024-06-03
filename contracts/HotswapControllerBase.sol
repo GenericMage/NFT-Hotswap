@@ -43,13 +43,20 @@ contract HotswapControllerBase is HotswapPair {
         return _liq.fftBalance();
     }
 
-    function updatePrice() public returns (uint256) {
+    function _updatePrice() internal returns (uint256) {
         uint256 nft = _scaleUp(nftLiquidity());
         uint256 fft = _normalize(fftLiquidity());
 
-        _price = _zerodiv(fft, nft);
+        _price = _computePrice(nft, fft);
 
         return _price;
+    }
+
+    function _computePrice(
+        uint256 nft,
+        uint256 fft
+    ) internal pure returns (uint256) {
+        return _zerodiv(fft, nft);
     }
 
     function setCollector(address addr) public onlyOwner {
@@ -59,7 +66,7 @@ contract HotswapControllerBase is HotswapPair {
     function setLiquidity(address addr) public onlyOwner {
         _liquidity = addr;
         _liq = HotswapLiquidity(addr);
-        updatePrice();
+        _updatePrice();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -147,6 +154,7 @@ contract HotswapControllerBase is HotswapPair {
     error InsufficientLiquidity();
     error InsufficientSwapAmount();
     error InvalidSwapPrice();
+    error FeeAlreadyClaimedForSlot();
     error NoReason(uint256 a, uint256 b);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

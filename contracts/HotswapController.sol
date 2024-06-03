@@ -49,57 +49,13 @@ contract HotswapController is HotswapControllerBase {
         }
     }
 
-    function claimFee(uint256 index, bool isNFT) public {
-        address targetAddr = msg.sender;
-        Liquid storage liquid = _queryUserLiquid(msg.sender, index, isNFT);
-
-        if (liquid.claimed) {
-            return;
-        }
-
-        uint256 tVol = tVolume;
-        uint256 cumulativeVol = tVol - liquid.dVolume;
-
-        uint256 fees = _getFee(cumulativeVol);
-
-        uint256 alloc = liquid.alloc;
-        uint256 talloc = _fetchLiquidity(isNFT);
-
-        uint256 nAllocRatio = _div(alloc, talloc);
-
-        fees = _mul(nAllocRatio, fees);
-
-        if (isNFT) {
-            fees = _mul(fees, _price);
-        }
-
-        fees = _denormalize(fees);
-
-        if (fees < 0) {
-            return;
-        }
-
-        if (_fft.transfer(targetAddr, fees)) {
-            liquid.claimed = true;
-            emit FeeClaimed(targetAddr, fees);
-        }
-    }
-
-    function _fetchLiquidity(bool isNFT) private returns (uint256) {
-        if (isNFT) {
-            return _scaleUp(nftLiquidity());
-        }
-
-        return _normalize(fftLiquidity());
-    }
-
     function _createLiquid(uint256 amount, bool isNFT) private {
         uint256[] storage userLiquid = isNFT
             ? _nftUserLiquid[msg.sender]
             : _fftUserLiquid[msg.sender];
         uint256 index = userLiquid.length;
 
-        uint256 price = updatePrice();
+        uint256 price = _updatePrice();
         uint256 allocRatio;
 
         if (isNFT) {
@@ -177,6 +133,37 @@ contract HotswapController is HotswapControllerBase {
         return isNFT ? _nftLiquids[indexes[n]] : _fftLiquids[indexes[n]];
     }
 
+    function _fetchLiquidity(bool isNFT) private returns (uint256) {
+        if (isNFT) {
+            return _scaleUp(nftLiquidity());
+        }
+
+        return _normalize(fftLiquidity());
+    }
+
+    function claimFee(uint256 index, bool isNFT) public {
+        address targetAddr = msg.sender;
+        Liquid storage liquid = _queryUserLiquid(msg.sender, index, isNFT);
+
+        if (liquid.claimed) {
+            revert FeeAlreadyClaimedForSlot();
+        }
+
+        uint256 tVol = tVolume;
+        uint256 cumulativeVol = tVol - liquid.dVolume;
+
+        uint256 fees = _mul(cumulativeVol, 4e18);
+        fees = _div(fees, 10000e18);
+
+        fees = _mul(liquid.allocRatio, fees);
+        fees = _denormalize(fees);
+
+        if (fees <= 0 || _fft.transfer(targetAddr, fees)) {
+            liquid.claimed = true;
+            emit FeeClaimed(targetAddr, fees);
+        }
+    }
+
     function withdrawLiquidity(uint256 index, bool isNFT) external {
         address user = msg.sender;
         uint256[] memory indexes = isNFT
@@ -192,11 +179,14 @@ contract HotswapController is HotswapControllerBase {
             revert InvalidWithdrawalRequest();
         }
 
-        uint256 alloc = lq.alloc;
         uint256 currentLiquidity = _fetchLiquidity(isNFT);
 
         uint256 nOutput = _mul(currentLiquidity, lq.allocRatio);
         uint256 outputAmount;
+
+        if (nOutput > lq.alloc) {
+            nOutput = lq.alloc;
+        }
 
         if (isNFT) {
             outputAmount = _scaleDown(nOutput);
@@ -206,15 +196,12 @@ contract HotswapController is HotswapControllerBase {
             _liq.withdrawFFT(outputAmount, msg.sender);
         }
 
-        _removeLiquidity(lq, n, isNFT);
+        _removeLiquidity(lq, n);
     }
 
-    function _removeLiquidity(
-        Liquid memory lq,
-        uint256 index,
-        bool isNFT
-    ) private {
+    function _removeLiquidity(Liquid memory lq, uint256 index) private {
         uint256 userIndex = lq.userIndex;
+        bool isNFT = lq.kind;
 
         Liquid storage last;
         mapping(address => uint256[]) storage liquidityByUser = isNFT
@@ -245,10 +232,9 @@ contract HotswapController is HotswapControllerBase {
     function _determineCost(
         bool isSell,
         uint256 nft,
-        uint256 constraint
+        uint256 constraint,
+        uint256 price
     ) private returns (uint256 nftAmount, uint256 fftAmount, uint256 fee) {
-        uint256 price = _price;
-
         if (price == 0) {
             revert InvalidSwapPrice();
         }
@@ -256,12 +242,20 @@ contract HotswapController is HotswapControllerBase {
         uint256 minout = 0;
         uint256 maxin = 0;
 
+        uint256 threshold = _normalize(
+            _div(_mul(fftLiquidity(), 51e18), 100e18)
+        );
+
         if (isSell) {
-            maxin = type(uint256).max;
+            maxin = threshold;
             minout = _normalize(constraint);
         } else {
             maxin = _normalize(constraint);
             minout = 0;
+
+            if (maxin > threshold) {
+                maxin = threshold;
+            }
         }
 
         nftAmount = _scaleUp(nft);
@@ -277,11 +271,7 @@ contract HotswapController is HotswapControllerBase {
             allowance = _fft.allowance(msg.sender, address(this));
         }
 
-        while (
-            targetAmount > allowance &&
-            targetAmount >= minout &&
-            targetAmount <= maxin
-        ) {
+        while (targetAmount > allowance || targetAmount > maxin) {
             nftAmount -= 1e18;
             fftAmount = _mul(nftAmount, _price);
             fee = _getFee(fftAmount);
@@ -311,23 +301,33 @@ contract HotswapController is HotswapControllerBase {
         emit Fee(amount);
     }
 
-    function _getPrice() private returns (uint256) {
-        if (_price == 0) {
-            return updatePrice();
-        }
-
-        return _price;
-    }
-
     function swapNFT(uint256 nftCount, uint256 minOutput) external {
-        _deposit(nftCount, true);
-        updatePrice();
-
         (uint256 nftAmount, uint256 fftAmount, uint256 fee) = _determineCost(
             true,
             nftCount,
-            minOutput
+            minOutput,
+            _price
         );
+
+        uint256 dnft = _scaleDown(nftAmount);
+        uint256 dfft = _denormalize(fftAmount);
+
+        uint256 newPrice = _computePrice(
+            nftLiquidity() - dnft,
+            dfft + fftLiquidity()
+        );
+
+        (nftAmount, fftAmount, fee) = _determineCost(
+            true,
+            nftCount,
+            minOutput,
+            newPrice
+        );
+
+        dnft = _scaleDown(nftAmount);
+        dfft = _denormalize(fftAmount);
+
+        _deposit(dnft, true);
         _deductFee(fee);
 
         uint256 ntfft = _normalize(fftLiquidity());
@@ -335,15 +335,7 @@ contract HotswapController is HotswapControllerBase {
             revert InsufficientLiquidity();
         }
 
-        uint256 dnft = _scaleDown(nftAmount);
-        uint256 dfft = _denormalize(fftAmount);
-
-        uint256 rem = nftCount - dnft;
-        if (rem > 0) {
-            _liq.withdrawNFT(rem, msg.sender);
-        }
-
-        updatePrice();
+        _updatePrice();
         _addVolume(fftAmount);
 
         _liq.withdrawFFT(dfft, msg.sender);
@@ -354,7 +346,8 @@ contract HotswapController is HotswapControllerBase {
         (uint256 nftAmount, uint256 fftAmount, uint256 fee) = _determineCost(
             false,
             nftCount,
-            maxInput
+            maxInput,
+            _price
         );
 
         uint256 dnft = _scaleDown(nftAmount);
@@ -371,53 +364,7 @@ contract HotswapController is HotswapControllerBase {
         _liq.withdrawNFT(dnft, msg.sender);
         emit Swap(dnft, dfft, msg.sender);
 
-        updatePrice();
+        _updatePrice();
         _addVolume(fftAmount);
-    }
-
-    function _swapNFTLiquid(
-        uint256 nSource,
-        uint256 amount,
-        uint256 price
-    ) private returns (uint256) {
-        uint256 altAmount;
-
-        Liquid storage source = _fftLiquids[nSource];
-        uint256 swapAmount = source.alloc <= amount ? source.alloc : amount;
-
-        altAmount = _rescale(_div(swapAmount, price));
-
-        amount -= swapAmount;
-        source.alloc -= swapAmount;
-
-        uint256 dSwap = _denormalize(swapAmount);
-        uint256 dAlt = _scaleDown(altAmount);
-
-        _liq.withdrawFFT(dSwap, msg.sender);
-        emit Swap(dAlt, dSwap, msg.sender);
-
-        return amount;
-    }
-
-    function _swapFFTLiquid(
-        uint256 nSource,
-        uint256 amount,
-        uint256 price
-    ) private returns (uint256) {
-        Liquid storage source = _nftLiquids[nSource];
-
-        uint256 swapAmount = source.alloc <= amount ? source.alloc : amount;
-        uint256 altAmount = _mul(swapAmount, price);
-
-        amount -= swapAmount;
-        source.alloc -= swapAmount;
-
-        uint256 dSwap = _scaleDown(swapAmount);
-        uint256 dAlt = _denormalize(altAmount);
-
-        _liq.withdrawNFT(dSwap, msg.sender);
-        emit Swap(dSwap, dAlt, msg.sender);
-
-        return amount;
     }
 }

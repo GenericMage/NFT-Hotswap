@@ -52,6 +52,29 @@ describe("HotswapFactory", function () {
       await expect(mockNFT.tokenOfOwnerByIndex(liqAddr, 1)).not.be.reverted;
     });
 
+    it("Should successfully constrain swapFFT", async () => {
+      const { factory, tendies, mockNFT, controller, liquidity } = await loadFixture(classicDeploy);
+      const [owner] = await ethers.getSigners();
+      const liqAddr = await liquidity.getAddress();
+      const ownerAddr = await owner.getAddress();
+
+      const controllerAddr = controller.getAddress();
+      await tendies.increaseAllowance(controllerAddr, BigInt(1100e18));
+      await mockNFT.setApprovalForAll(controllerAddr, true);
+
+      await controller.depositNFT(8);
+      await controller.depositFFT(BigInt(900e18));
+
+      const tx = await controller.swapFFT(3, BigInt(200e18));
+      const rcpt = await tx.wait();
+
+      for (const log of rcpt?.logs ?? []) {
+        if ("fragment" in log) {
+          console.log(`${log.fragment.name} => ${log.args}`);
+        }
+      }
+    });
+
     it("should successfully swap FFTs", async () => {
       const [owner] = await ethers.getSigners();
       const { factory, tendies, mockNFT, controller, liquidity } = await loadFixture(classicDeploy);
@@ -82,7 +105,7 @@ describe("HotswapFactory", function () {
 
       console.log("After swap\n------------------");
       console.log(); console.log();
-      const tx = await controller.swapFFT(3, BigInt(0xFFFFFF));
+      const tx = await controller.swapFFT(3, BigInt(400e18));
       const rcpt = await tx.wait();
 
       for (const log of rcpt?.logs ?? []) {
@@ -94,17 +117,20 @@ describe("HotswapFactory", function () {
       console.log(await controller.queryLiquid(0, true));
       console.log(await controller.queryLiquid(0, false));
 
-      try {
-        await controller.withdrawLiquidity(0, true);
-      } catch (err) {
-        console.log(err);
-      }
+      // try {
+      //   await controller.withdrawLiquidity(0, true);
+      // } catch (err) {
+      //   console.log(err);
+      // }
 
-      try {
-        await controller.withdrawLiquidity(0, false);
-      } catch (err) {
-        console.log(err);
-      }
+      // try {
+      //   await controller.withdrawLiquidity(0, false);
+      // } catch (err) {
+      //   console.log(err);
+      // }
+
+      await controller.claimFee(0, true);
+      // await controller.claimFee(0, false);
 
       //await expect(controller.withdrawLiquidity(0)).to.not.reverted;
       // console.log(await controller.queryLiquid(0));
@@ -129,7 +155,7 @@ describe("HotswapFactory", function () {
       await controller.depositNFT(10);
       await controller.depositFFT(BigInt(300e18));
 
-      await controller.updatePrice();
+      //await controller.updatePrice();
 
 
       console.log("Before swap\n------------------");
@@ -144,7 +170,7 @@ describe("HotswapFactory", function () {
 
       console.log("After swap\n------------------");
       console.log(); console.log();
-      const tx = await controller.swapNFT(4, 0);
+      const tx = await controller.swapNFT(4, BigInt(120e18));
       const rcpt = await tx.wait();
 
       for (const log of rcpt?.logs ?? []) {
@@ -163,7 +189,6 @@ describe("HotswapFactory", function () {
       console.log(await controller._price());
       console.log("Balances", await mockNFT.balanceOf(ownerAddr), await tendies.balanceOf(ownerAddr));
     });
-
   });
 });
 
