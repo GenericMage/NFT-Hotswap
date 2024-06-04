@@ -102,7 +102,7 @@ NFT or FFT Alloc (selects based on deposit type) / Total FFT or NFT Liquidity (s
 
 fees accrued * liquidity contribution = output amount
 
-Output amount cannot be greater than available fees, if greater then only pay a available fees. 
+Output amount cannot be greater than available fees, if greater then only pay available fees. 
 
 - withdraw ;
 Withdraws either NFT or FFT based on how much the caller is owed.
