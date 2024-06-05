@@ -96,13 +96,15 @@ Claims fees on a target liquidity slot owned by the caller. Uses the following f
 
 tVolume - dVolume = cVolume 
 
-cVolume / 100 * 0.04 = fees accrued 
+cVolume / tVolume = volume ratio 
 
-NFT or FFT Alloc (selects based on deposit type) / Total FFT or NFT Liquidity (selects based on deposit type) = Liquidity contribution 
+volume ratio * total fees  = fees accrued 
+
+NFT or FFT Alloc  / Total FFT or NFT Liquidity = Liquidity contribution 
+
+(selects based on deposit type)
 
 fees accrued * liquidity contribution = output amount
-
-Output amount cannot be greater than available fees, if greater then only pay available fees. 
 
 - withdraw ;
 Withdraws either NFT or FFT based on how much the caller is owed.
