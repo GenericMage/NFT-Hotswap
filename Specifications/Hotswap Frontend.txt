@@ -75,6 +75,16 @@ Pushes a transaction for a deposit using the details provided.
 2e ; Positions panel ; 
 Returns all liquidity positions the user has, first shows the amount, if greater than 99999 then it displays as 1.0e5. Shows the token ticker up to 4 letters, more than 4 is displayed as "XXXX...". Lasting it displays the amount of fees collected and unclaimed, if claimed this returns "N/A". 
 
+Unclaimed fees are calculated by using the following formula from the hotswap contracts specifications; 
+
+tVolume - dVolume = cVolume 
+
+cVolume / 100 * 0.04 = fees accrued 
+
+NFT or FFT Alloc / Total FFT or NFT Liquidity = Liquidity contribution 
+
+fees accrued * liquidity contribution = unclaimed fees
+
 2f ; Withdraw button ;
 Pushes a transaction to withdraw the target liquidity position. 
 
