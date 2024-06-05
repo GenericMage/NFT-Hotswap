@@ -73,3 +73,14 @@ export async function classicDeploy() {
 
   return { mockNFT, mockFFT, tendies, factory, controller, liquidity }
 }
+
+export async function outputLogs(act: Promise<ContractTransactionResponse>) {
+  const tx = await act;
+  const rcpt = await tx.wait()
+
+  for (const log of rcpt?.logs ?? []) {
+    if ("fragment" in log) {
+      console.log(`${log.fragment.name} => ${log.args}`);
+    }
+  }
+};

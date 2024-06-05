@@ -3,7 +3,7 @@ import { ContractTransactionResponse } from "ethers";
 import { ethers } from "hardhat";
 import { HotswapController, HotswapLiquidity } from "../typechain-types";
 import { expect } from "chai";
-import { classicDeploy } from "./common";
+import { classicDeploy, outputLogs } from "./common";
 
 const DEPLOY_FEE = 1e15;
 
@@ -77,7 +77,7 @@ describe("HotswapFactory", function () {
 
     it("should successfully swap FFTs", async () => {
       const [owner] = await ethers.getSigners();
-      const { factory, tendies, mockNFT, controller, liquidity } = await loadFixture(classicDeploy);
+      const { factory, tendies, mockNFT, mockFFT, controller, liquidity } = await loadFixture(classicDeploy);
 
       const ownerAddr = await owner.getAddress();
 
@@ -86,6 +86,8 @@ describe("HotswapFactory", function () {
       await mockNFT.setApprovalForAll(controllerAddr, true);
 
       await controller.depositNFT(8);
+      await controller.depositNFT(3);
+      await controller.depositNFT(10);
       await controller.depositFFT(BigInt(900e18));
 
       console.log("Before swap\n------------------");
@@ -129,8 +131,14 @@ describe("HotswapFactory", function () {
       //   console.log(err);
       // }
 
-      await controller.claimFee(0, true);
-      // await controller.claimFee(0, false);
+      console.log("BControllerBalance", await tendies.balanceOf(await controller.getAddress()));
+
+      // await outputLogs(controller.claimFee(0, false));
+      // await outputLogs(controller.claimFee(0, true));
+      await outputLogs(controller.claimFee(1, true));
+      await outputLogs(controller.claimFee(2, true));
+
+      console.log("ControllerBalance", await tendies.balanceOf(await controller.getAddress()));
 
       //await expect(controller.withdrawLiquidity(0)).to.not.reverted;
       // console.log(await controller.queryLiquid(0));
@@ -170,7 +178,7 @@ describe("HotswapFactory", function () {
 
       console.log("After swap\n------------------");
       console.log(); console.log();
-      const tx = await controller.swapNFT(4, BigInt(120e18));
+      const tx = await controller.swapNFT(4, BigInt(30e18));
       const rcpt = await tx.wait();
 
       for (const log of rcpt?.logs ?? []) {

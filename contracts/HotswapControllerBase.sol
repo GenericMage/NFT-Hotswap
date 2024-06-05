@@ -21,11 +21,8 @@ contract HotswapControllerBase is HotswapPair {
     uint256 public _price;
     mapping(uint8 => uint256) private _scalars;
 
-    mapping(address => uint256[]) internal _nftUserLiquid;
-    mapping(address => uint256[]) internal _fftUserLiquid;
-
-    Liquid[] public _nftLiquids;
-    Liquid[] public _fftLiquids;
+    mapping(address => Liquid[]) internal _nftLiquids;
+    mapping(address => Liquid[]) internal _fftLiquids;
 
     uint256 public _fees;
 
@@ -44,10 +41,7 @@ contract HotswapControllerBase is HotswapPair {
     }
 
     function _updatePrice() internal returns (uint256) {
-        uint256 nft = _scaleUp(nftLiquidity());
-        uint256 fft = _normalize(fftLiquidity());
-
-        _price = _computePrice(nft, fft);
+        _price = _computePrice(nftLiquidity(), fftLiquidity());
 
         return _price;
     }
@@ -55,7 +49,10 @@ contract HotswapControllerBase is HotswapPair {
     function _computePrice(
         uint256 nft,
         uint256 fft
-    ) internal pure returns (uint256) {
+    ) internal returns (uint256) {
+        nft = _scaleUp(nft);
+        fft = _normalize(fft);
+
         return _zerodiv(fft, nft);
     }
 
@@ -121,7 +118,6 @@ contract HotswapControllerBase is HotswapPair {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Data Structures
     struct Liquid {
-        uint256 userIndex;
         uint256 price;
         address depositor;
         uint256 depositedAt;
@@ -145,8 +141,8 @@ contract HotswapControllerBase is HotswapPair {
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Events and Errors
-    event Swap(uint256 nft, uint256 fft, address user);
-    event Fee(uint256 fee);
+    event Swap(uint256 nft, uint256 fft, address user, uint256 price);
+    event ChargedFee(uint256 fee);
     event FeeClaimed(address user, uint256 amount);
 
     error DepositFailed();
