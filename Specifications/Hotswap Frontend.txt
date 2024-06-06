@@ -2,7 +2,7 @@
 A frontend application for 'Dexhune : NFT Hotswap'. 
 
 ! General !
-The app allows users to insert a hotswap LP address and either swap for it - add liquidity - claims fees on liquidity positions or withdraw their liquidity. 
+The app allows users to create new hotswap LPs, or insert an existing hotswap LP address and either swap for it - add liquidity - claims fees on liquidity positions or withdraw their liquidity. 
 
 ! Page 1 !
 1a ;  Wallet connect
@@ -16,16 +16,17 @@ Allows the user to insert a listing address to interact with.
 Begins interacting with the stated listing address.
 
 1e ; Factory Contract Link ;
-Text link that says "Factory". 
+Sends the user to an etherscan URL where the factory is deployed. 
 
 1f ; Github link
 
 1g ; Trade menu.
 
 1h ; price ;
-Calculates the value of the NFT in FFT by fetching the amounts of both in the LP. 
+Queries the stated hotswap controller, fetches the price, decimals and name, normalizes decimals, stores the value. 
 
-Example; there is 10,000,000 FFT and 10 NFT in the LP, (FFT amount) / (NFT amount) = 1,000,000. 
+Examples; price is 100000000000000000000, with 18 decimals that is 100. Stores the data as 100 [FFT name] to 1 [NFT name]. 
+
 
 1i; Amount Field ;
 Allows the user to state a number of NFTs to buy or sell. 
@@ -37,16 +38,36 @@ Determines if the swap is for buy or sell.
 determines how much is set in "minOutput" or "maxInput" in 1m. 
 
 1l ; Cost/settlement display ;
-Shows how much [FFT] the swap will cost or settle. 
+Shows how much [FFT] the swap will cost or settle.
+ 
+For buys this is gotten by calculating; 
+
+Swap amount * price = initial input
+Initial input / 100 * slippage percent = added input
+added input + initial input = cost 
+
+For sells this is gotten by calculating; 
+
+Swap amount * price = initial output 
+Initial output / 100 * slippage percent = lost output
+initial output - lost input = settlement 
+
 
 1m ; Swap button ;
 (Presents a popup to approve the NFT or FFT for trade if not already approved)
 Pushes a transaction to execute the swap with the stated details. 
 
-Slippage setting is determined as; 
-amount * price = swap cost
-swap cost / 100 * slippage = delta
-swap cost + delta =  maxInput or minOutput. 
+Slippage setting is determined for buys as; 
+
+amount * price = swap input
+swap input / 100 * slippage = delta
+swap input + delta =  maxInput
+
+Slippage setting is determined for sells as; 
+
+amount * price = swap output
+swap output / 100 * slippage = delta
+swap output - delta =  minOutput
 
 "slippage" is the number set in the slippage field on 1k.
 
@@ -54,7 +75,7 @@ swap cost + delta =  maxInput or minOutput.
 Presents Page 2.
 
 1o ; Listing Menu ; 
-Presents page 4.
+Presents page 3.
 
 1p ; close button ; 
 Closes the trade menu.
@@ -70,30 +91,35 @@ Closes the trade menu.
 Determines if the user is depositing the target NFT or FFT in the listing. 
 
 2d ; Deposit button ; 
-Pushes a transaction for a deposit using the details provided. 
+Displays a pop-up for the user to approve the FFT or NFT if enough is not approved for deposit, if already approved then it pushes a transaction for deposit using the details provided. 
 
 2e ; Positions panel ; 
-Returns all liquidity positions the user has, first shows the amount, if greater than 99999 then it displays as 1.0e5. Shows the token ticker up to 4 letters, more than 4 is displayed as "XXXX...". Lasting it displays the amount of fees collected and unclaimed, if claimed this returns "N/A". 
+Returns all liquidity positions the user has, first shows the amount, if greater than 99999 then it displays as 1.0e5. Shows the token ticker up to 4 letters, more than 4 is displayed as "XXXX...". lastly it displays the amount of fees collected and unclaimed, if claimed this returns "N/A".  
 
 Unclaimed fees are calculated by using the following formula from the hotswap contracts specifications; 
 
 tVolume - dVolume = cVolume 
 
-cVolume / 100 * 0.04 = fees accrued 
+cVolume / tVolume = volume ratio 
 
-NFT or FFT Alloc / Total FFT or NFT Liquidity = Liquidity contribution 
+volume ratio * total fees  = fees accrued 
 
-fees accrued * liquidity contribution = unclaimed fees
+NFT or FFT Alloc  / Total FFT or NFT Liquidity = Liquidity contribution 
 
-2f ; Withdraw button ;
-Pushes a transaction to withdraw the target liquidity position. 
+(selects based on deposit type)
 
-2g ; Claim fees button ;
+fees accrued * liquidity contribution = unclaimed fees 
+
+2f ; Claim fees button ;
 Pushes a transaction to claim fees on a given liquidity position. 
+
+2g ; Withdraw button ;
+Pushes a transaction to withdraw the target liquidity position. 
 
 2h ; scroll bar
 
-2i ; Close button (returns the user to the main menu)
+2i ; Close button ; 
+returns the user to the landing page.
 
 ! Page 3 ! 
 3a ; Listing menu
@@ -102,9 +128,13 @@ Pushes a transaction to claim fees on a given liquidity position.
 
 3c ; FFT Address 
 
-3d ; List button
+3d ; List button ;
+Pushes transaction to list the addresses set in "NFT Address" and "FFT Address", sets "0.001" in the payable field. 
 
 3e ; close button
 
-/// Notes /// 
-Functions like "swap" and "deposit" will require a popup that triggers "approve" (if FFT) or "setApprovalForAll" (if NFT). 
+
+/// Notes ///
+- Price is only fetched once the page is loaded or after a transaction occurs. 
+
+- NFTs use "setApprovalForAll' to approve a token for trading. 
