@@ -20,7 +20,7 @@ contract HotswapFactory is HotswapBase {
     address[] public liquids;
 
     address payable _defaultCollector;
-    uint256 private constant DEPLOY_FEE = 1e15;
+    uint256 public constant DEPLOY_FEE = 1e15;
 
     constructor() {
         _defaultCollector = payable(msg.sender);

@@ -99,10 +99,11 @@ contract HotswapController is HotswapControllerBase {
 
         return
             LiquidData(
-                lq.depositor,
                 lq.depositedAt,
                 lq.price,
                 lq.alloc,
+                lq.allocRatio,
+                lq.dVolume,
                 lq.kind,
                 lq.claimed
             );

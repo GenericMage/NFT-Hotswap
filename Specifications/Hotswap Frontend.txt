@@ -1,7 +1,7 @@
 /// Premise ///
 A frontend application for 'Dexhune : NFT Hotswap'. 
 
-! General !
+! General ! 
 The app allows users to create new hotswap LPs, or insert an existing hotswap LP address and either swap for it - add liquidity - claims fees on liquidity positions or withdraw their liquidity. 
 
 ! Page 1 !

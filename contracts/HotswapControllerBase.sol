@@ -129,10 +129,11 @@ contract HotswapControllerBase is HotswapPair {
     }
 
     struct LiquidData {
-        address depositor;
         uint256 depositedAt;
         uint256 price;
         uint256 alloc;
+        uint256 allocRatio;
+        uint256 dVolume;
         bool kind;
         bool claimed;
     }

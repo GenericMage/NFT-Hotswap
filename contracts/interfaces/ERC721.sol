@@ -28,4 +28,11 @@ interface ERC721 {
         address _owner,
         uint256 _index
     ) external view returns (uint256);
+
+    function isApprovedForAll(
+        address _owner,
+        address _operator
+    ) external view returns (bool);
+
+    function setApprovalForAll(address _operator, bool _approved) external;
 }

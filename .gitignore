@@ -13,4 +13,9 @@ node_modules
 /coverage
 /coverage.json
 
+**/Landing Exp/
+**/NFT Liquidity Menu Exp/
+**/NFT Listing Menu Exp/
+**/Swap Menu Exp/
+
 .env.*
