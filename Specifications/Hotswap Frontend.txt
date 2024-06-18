@@ -57,7 +57,7 @@ Then using impact price to determine settlement;
 
 Swap amount * impact price = initial output 
 Initial output / 100 * slippage percent = lost output
-initial output - lost input = settlement 
+initial output - lost output = settlement 
 
 
 1m ; Swap button ;
