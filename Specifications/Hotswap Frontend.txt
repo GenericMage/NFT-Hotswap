@@ -46,9 +46,16 @@ Swap amount * price = initial input
 Initial input / 100 * slippage percent = added input
 added input + initial input = cost 
 
-For sells this is gotten by calculating; 
+For sells this is gotten by first calculating impact price; 
 
-Swap amount * price = initial output 
+NFT swap amount * price = FFT output 
+FFT Liquidity - FFT output = FFT impact 
+NFT Liquidity + NFT swap amount = NFT impact 
+FFT impact / NFT impact = impact price 
+
+Then using impact price to determine settlement; 
+
+Swap amount * impact price = initial output 
 Initial output / 100 * slippage percent = lost output
 initial output - lost input = settlement 
 
