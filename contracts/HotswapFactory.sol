@@ -67,7 +67,6 @@ contract HotswapFactory is HotswapBase {
     function deployHotswap(address nft, address fft) external payable {
         require(msg.value == DEPLOY_FEE, "Invalid fee amount");
 
-        // TODO: Probably allow default collector to be changable
         if (_defaultCollector != address(0)) {
             _transferNative(_defaultCollector, msg.value);
         }

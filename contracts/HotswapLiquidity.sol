@@ -32,14 +32,22 @@ contract HotswapLiquidity is HotswapPair {
     }
 
     function withdrawFFT(uint256 amount, address dest) external onlyAuthorized {
-        if (amount == 0) return;
+        uint256 available = _fft.balanceOf(address(this));
+
+        if (amount == 0 || amount > available) {
+            revert InsufficientLiquidity(amount, available);
+        }
 
         require(_fft.transfer(dest, amount), "Withdrawal failed");
         emit WithdrawFFT(amount, dest);
     }
 
     function withdrawNFT(uint256 amount, address dest) external onlyAuthorized {
-        if (amount == 0) return;
+        uint256 available = _nft.balanceOf(address(this));
+
+        if (amount == 0 || amount > available) {
+            revert InsufficientLiquidity(amount, available);
+        }
 
         uint256 tokenId;
         bytes memory data = new bytes(0);
@@ -58,5 +66,6 @@ contract HotswapLiquidity is HotswapPair {
 
     event WithdrawNFT(uint256 amount, address addr);
     event WithdrawFFT(uint256 amount, address addr);
-    error NoReason(uint256 a, uint256 b);
+
+    error InsufficientLiquidity(uint256 value, uint256 available);
 }

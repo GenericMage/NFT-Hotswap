@@ -58,7 +58,7 @@ const config: HardhatUserConfig & Partial<HardhatContractSizerConfig> = {
 
   //"0.8.25",
   etherscan: {
-    apiKey: process.env.FTM_API_KEY as string
+    apiKey: process.env.POLY_API_KEY as string
     // apiKey: process.env.SNOWTRACE_API_KEY as string
   },
   networks: {
@@ -78,6 +78,11 @@ const config: HardhatUserConfig & Partial<HardhatContractSizerConfig> = {
     ftm_testnet: {
       url: "https://rpc.testnet.fantom.network",
       chainId: 4002,
+      accounts: [process.env.PRIVATE_KEY as string],
+    },
+    poly_mainnet: {
+      url: "https://polygon-rpc.com/",
+      chainId: 137,
       accounts: [process.env.PRIVATE_KEY as string],
     },
     avax_testnet: {

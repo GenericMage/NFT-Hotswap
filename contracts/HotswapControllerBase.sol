@@ -19,7 +19,9 @@ contract HotswapControllerBase is HotswapPair {
     address public _liquidity;
 
     uint256 public _price;
-    mapping(uint8 => uint256) private _scalars;
+
+    uint256 internal _scalar;
+    uint256 internal _nftScalar;
 
     mapping(address => Liquid[]) internal _nftLiquids;
     mapping(address => Liquid[]) internal _fftLiquids;
@@ -27,9 +29,15 @@ contract HotswapControllerBase is HotswapPair {
     uint256 public _fees;
 
     HotswapLiquidity internal _liq;
+    nuint256 FEE_CONSTANT = nuint256.wrap(5e14); // 0.05% => 500000000000000;
+    nuint256 MAX_LIQUIDITY_CONSTANT = nuint256.wrap(51e16); // 51% => 510000000000000000;
+    nuint256 COLLECTOR_CONSTANT = nuint256.wrap(2e17); // 20% => 200000000000000000
 
     constructor(address nft, address fft) HotswapPair(nft, fft) {
         _collector = msg.sender;
+
+        _scalar = 10 ** (18 - decimals);
+        _nftScalar = 10 ** decimals;
     }
 
     function nftLiquidity() public view returns (uint256) {
@@ -49,11 +57,10 @@ contract HotswapControllerBase is HotswapPair {
     function _computePrice(
         uint256 nft,
         uint256 fft
-    ) internal returns (uint256) {
+    ) internal view returns (uint256) {
         nft = _scaleUp(nft);
-        fft = _normalize(fft);
 
-        return _zerodiv(fft, nft);
+        return _denormalize(_zerodiv(fft, nft));
     }
 
     function setCollector(address addr) public onlyOwner {
@@ -68,49 +75,122 @@ contract HotswapControllerBase is HotswapPair {
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Math
-    function _mul(uint256 num1, uint256 num2) internal pure returns (uint256) {
-        return PreciseMath.mul(num1, num2);
+    type nuint256 is uint256;
+
+    function _mul(
+        uint256 num1,
+        nuint256 num2
+    ) internal view returns (nuint256) {
+        nuint256 nnum1 = _normalize(num1);
+        return _mul(nnum1, num2);
     }
 
-    function _div(uint256 num1, uint256 num2) internal pure returns (uint256) {
-        return PreciseMath.div(num1, num2);
+    function _mul(
+        nuint256 num1,
+        uint256 num2
+    ) internal view returns (nuint256) {
+        nuint256 nnum2 = _normalize(num2);
+        return _mul(num1, nnum2);
+    }
+
+    function _mul(uint256 num1, uint256 num2) internal view returns (nuint256) {
+        nuint256 nnum1 = _normalize(num1);
+        nuint256 nnum2 = _normalize(num2);
+        return _mul(nnum1, nnum2);
+    }
+
+    function _mul(
+        nuint256 num1,
+        nuint256 num2
+    ) internal pure returns (nuint256) {
+        return
+            nuint256.wrap(
+                PreciseMath.mul(nuint256.unwrap(num1), nuint256.unwrap(num2))
+            );
+    }
+
+    function _div(
+        uint256 num1,
+        nuint256 num2
+    ) internal view returns (nuint256) {
+        nuint256 nnum1 = _normalize(num1);
+        return _div(nnum1, num2);
+    }
+
+    function _div(
+        nuint256 num1,
+        uint256 num2
+    ) internal view returns (nuint256) {
+        nuint256 nnum2 = _normalize(num2);
+        return _div(num1, nnum2);
+    }
+
+    function _div(uint256 num1, uint256 num2) internal view returns (nuint256) {
+        nuint256 nnum1 = _normalize(num1);
+        nuint256 nnum2 = _normalize(num2);
+        return _div(nnum1, nnum2);
+    }
+
+    function _div(
+        nuint256 num1,
+        nuint256 num2
+    ) internal pure returns (nuint256) {
+        return
+            nuint256.wrap(
+                PreciseMath.div(nuint256.unwrap(num1), nuint256.unwrap(num2))
+            );
+    }
+
+    function _zerodiv(
+        uint256 num1,
+        nuint256 num2
+    ) internal view returns (nuint256) {
+        nuint256 nnum1 = _normalize(num1);
+        return _zerodiv(nnum1, num2);
+    }
+
+    function _zerodiv(
+        nuint256 num1,
+        uint256 num2
+    ) internal view returns (nuint256) {
+        nuint256 nnum2 = _normalize(num2);
+        return _zerodiv(num1, nnum2);
     }
 
     function _zerodiv(
         uint256 num1,
         uint256 num2
-    ) internal pure returns (uint256) {
-        return num2 > 0 ? PreciseMath.div(num1, num2) : 0;
+    ) internal view returns (nuint256) {
+        nuint256 nnum1 = _normalize(num1);
+        nuint256 nnum2 = _normalize(num2);
+        return _zerodiv(nnum1, nnum2);
     }
 
-    function _scaleUp(uint256 amount) internal pure returns (uint256) {
-        return amount * 1e18;
+    function _zerodiv(
+        nuint256 num1,
+        nuint256 num2
+    ) internal pure returns (nuint256) {
+        uint256 dnum1 = nuint256.unwrap(num1);
+        uint256 dnum2 = nuint256.unwrap(num2);
+
+        return nuint256.wrap(dnum2 > 0 ? PreciseMath.div(dnum1, dnum2) : 0);
     }
 
-    function _scaleDown(uint256 amount) internal pure returns (uint256) {
-        return amount / 1e18;
+    function _scaleUp(uint256 amount) internal view returns (uint256) {
+        return amount * _nftScalar;
     }
 
-    function _rescale(uint256 amount) internal pure returns (uint256) {
-        return _scaleDown(_scaleUp(amount));
+    function _scaleDown(uint256 amount) internal view returns (uint256) {
+        return amount / _nftScalar;
     }
 
-    function _normalize(uint256 amount) internal returns (uint256) {
-        return decimals == 1 ? amount : amount * _computeScalar(decimals);
+    function _normalize(uint256 amount) internal view returns (nuint256) {
+        return nuint256.wrap(decimals == 1 ? amount : amount * _scalar);
     }
 
-    function _denormalize(uint256 amount) internal returns (uint256) {
-        return decimals == 1 ? amount : amount / _computeScalar(decimals);
-    }
-
-    function _computeScalar(uint8 decimals) internal returns (uint256 scalar) {
-        scalar = _scalars[decimals];
-
-        if (scalar == 0) {
-            unchecked {
-                _scalars[decimals] = scalar = 10 ** (18 - decimals);
-            }
-        }
+    function _denormalize(nuint256 amount) internal view returns (uint256) {
+        uint256 dAmount = nuint256.unwrap(amount);
+        return decimals == 1 ? dAmount : dAmount / _scalar;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,7 +202,7 @@ contract HotswapControllerBase is HotswapPair {
         address depositor;
         uint256 depositedAt;
         uint256 alloc;
-        uint256 allocRatio;
+        nuint256 allocRatio;
         uint256 dVolume;
         bool kind;
         bool claimed;
@@ -132,7 +212,7 @@ contract HotswapControllerBase is HotswapPair {
         uint256 depositedAt;
         uint256 price;
         uint256 alloc;
-        uint256 allocRatio;
+        nuint256 allocRatio;
         uint256 dVolume;
         bool kind;
         bool claimed;
@@ -152,7 +232,6 @@ contract HotswapControllerBase is HotswapPair {
     error InsufficientSwapAmount();
     error InvalidSwapPrice();
     error FeeAlreadyClaimedForSlot();
-    error NoReason(uint256 a, uint256 b);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
