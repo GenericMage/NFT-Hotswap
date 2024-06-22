@@ -15,9 +15,15 @@ import "./HotswapBase.sol";
 import "./HotswapController.sol";
 import "./HotswapLiquidity.sol";
 
+struct AddressPair {
+    address controller;
+    address liquidity;
+}
+
 contract HotswapFactory is Ownable {
-    address[] public controllers;
-    address[] public liquids;
+    mapping(uint256 => AddressPair) public pairs;
+    mapping(address => mapping(address => uint256)) private indexMap;
+    uint256 _pairLength;
 
     address payable _defaultCollector;
     uint256 public constant DEPLOY_FEE = 1e15;
@@ -37,31 +43,70 @@ contract HotswapFactory is Ownable {
         address controllerAddr,
         address factoryAddr
     ) external onlyOwner {
-        IOwnable(controllerAddr).transferOwnership(factoryAddr);
-        address targetAddr;
+        HotswapController ctrl = HotswapController(controllerAddr);
+        ctrl.transferOwnership(factoryAddr);
+        _removePair(controllerAddr, ctrl._liquidity());
 
-        // Remove the controller from our records
-        for (uint256 i = controllers.length; i > 0; i--) {
-            targetAddr = controllers[i - 1];
+        try
+            HotswapFactory(factoryAddr).adoptController(controllerAddr)
+        {} catch {}
+    }
 
-            if (controllerAddr != targetAddr) {
-                break;
-            }
+    function adoptController(address controller) external {
+        HotswapController ctrl = HotswapController(controller);
 
-            uint256 last = controllers.length - 1;
-            if (i != last) {
-                controllers[i] = controllers[last];
-            }
-
-            controllers.pop();
+        if (ctrl.owner() != address(this)) {
+            revert ControllerNotOwned();
         }
+
+        address liquidity = ctrl._liquidity();
+
+        (bool valid, ) = _getPair(controller, liquidity);
+
+        if (valid) {
+            revert DuplicatePair();
+        }
+
+        _addPair(controller, liquidity);
+    }
+
+    function _addPair(address controller, address liquidity) private {
+        indexMap[controller][liquidity] = _pairLength;
+        pairs[_pairLength++] = AddressPair(controller, liquidity);
+    }
+
+    function setLiquidity(
+        address controllerAddr,
+        address newAddr
+    ) external onlyOwner {
+        HotswapController ctrl = HotswapController(controllerAddr);
+        address liquidityAddr = ctrl._liquidity();
+
+        (bool valid, ) = _getPair(controllerAddr, liquidityAddr);
+
+        if (valid) {
+            _removePair(controllerAddr, liquidityAddr);
+        }
+
+        ctrl.setLiquidity(liquidityAddr);
+        _addPair(controllerAddr, newAddr);
     }
 
     function setController(
         address liquidityAddr,
-        address addr
+        address newAddr
     ) external onlyOwner {
-        HotswapLiquidity(liquidityAddr).setController(addr);
+        HotswapLiquidity liq = HotswapLiquidity(liquidityAddr);
+        address controllerAddr = liq.controller();
+
+        (bool valid, ) = _getPair(controllerAddr, liquidityAddr);
+
+        if (valid) {
+            _removePair(controllerAddr, liquidityAddr);
+        }
+
+        liq.setController(newAddr);
+        _addPair(newAddr, liquidityAddr);
     }
 
     function deployHotswap(address nft, address fft) external payable {
@@ -84,10 +129,40 @@ contract HotswapFactory is Ownable {
             controller.setCollector(_defaultCollector);
         }
 
-        controllers.push(controllerAddr);
-        liquids.push(liquidityAddr);
+        _addPair(controllerAddr, liquidityAddr);
 
         emit HotswapDeployed(controllerAddr, liquidityAddr);
+    }
+
+    function _getPair(
+        address controller,
+        address liquidity
+    ) private view returns (bool valid, uint256 n) {
+        n = indexMap[controller][liquidity];
+        AddressPair memory pair = pairs[n];
+        valid = pair.controller == controller && pair.liquidity == liquidity;
+    }
+
+    function _removePair(address controller, address liquidity) private {
+        if (_pairLength == 0) {
+            return;
+        }
+
+        (bool valid, uint256 n) = _getPair(controller, liquidity);
+
+        if (!valid) {
+            return;
+        }
+
+        uint256 nlast = _pairLength - 1;
+        if (nlast != n) {
+            AddressPair memory last = pairs[nlast];
+            indexMap[last.controller][last.liquidity] = n;
+            pairs[n] = last;
+        }
+
+        delete pairs[nlast];
+        delete indexMap[controller][liquidity];
     }
 
     function setDefaultCollector(address addr) external {
@@ -108,4 +183,7 @@ contract HotswapFactory is Ownable {
 
     event NativeTransferred(uint256 amount, address targetAddr);
     event HotswapDeployed(address controller, address liquidity);
+
+    error ControllerNotOwned();
+    error DuplicatePair();
 }

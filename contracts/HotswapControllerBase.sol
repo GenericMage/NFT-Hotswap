@@ -72,7 +72,6 @@ contract HotswapControllerBase is HotswapPair {
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Math
-
     function _mul(
         uint256 num1,
         nuint256 num2
@@ -203,6 +202,5 @@ contract HotswapControllerBase is HotswapPair {
     error InsufficientSwapAmount();
     error InvalidSwapPrice();
     error FeeAlreadyClaimedForSlot();
-
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
