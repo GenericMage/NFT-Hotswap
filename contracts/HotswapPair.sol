@@ -10,11 +10,13 @@
 
 pragma solidity ^0.8.25;
 
-import "./HotswapBase.sol";
+import "./Ownable.sol";
 import "./interfaces/ERC20.sol";
 import "./interfaces/ERC721.sol";
 
-contract HotswapPair is HotswapBase {
+contract HotswapPair is Ownable {
+    type nuint256 is uint256;
+
     address public NFT;
     address public FFT;
 
@@ -33,7 +35,22 @@ contract HotswapPair is HotswapBase {
             return "Legacy";
         }
 
-        return string.concat(string.concat(_nft.name(), " - "), _fft.name());
+        string memory szNFT;
+        string memory szFFT;
+
+        try _nft.name() returns (string memory nftName) {
+            szNFT = nftName;
+        } catch {
+            szNFT = "Unknown";
+        }
+
+        try _fft.name() returns (string memory fftName) {
+            szFFT = fftName;
+        } catch {
+            szFFT = "Unknown";
+        }
+
+        return string.concat(string.concat(szNFT, " - "), szFFT);
     }
 
     function setNFT(address addr) private {

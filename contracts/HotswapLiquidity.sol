@@ -11,17 +11,12 @@ pragma solidity ^0.8.25;
 import "./Ownable.sol";
 import "./interfaces/ERC20.sol";
 import "./interfaces/ERC721.sol";
-import "./HotswapPair.sol";
+import "./HotswapLiquidStorage.sol";
 
-contract HotswapLiquidity is HotswapPair {
+contract HotswapLiquidity is HotswapLiquidStorage {
     address public controller;
 
-    modifier onlyAuthorized() {
-        require(msg.sender == _owner || msg.sender == controller);
-        _;
-    }
-
-    constructor(address nft, address fft) HotswapPair(nft, fft) {}
+    constructor(address nft, address fft) HotswapLiquidStorage(nft, fft) {}
 
     function nftBalance() external view returns (uint256) {
         return _nft.balanceOf(address(this));
@@ -61,7 +56,9 @@ contract HotswapLiquidity is HotswapPair {
     }
 
     function setController(address addr) external onlyOwner {
+        _auth[controller] = false;
         controller = addr;
+        _auth[controller] = true;
     }
 
     event WithdrawNFT(uint256 amount, address addr);

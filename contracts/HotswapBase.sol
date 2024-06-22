@@ -12,8 +12,6 @@ import "./Ownable.sol";
 import "./libraries/SafeMath.sol";
 
 contract HotswapBase is Ownable {
-    using SafeMath for uint256;
-
     function _transferNative(
         address payable to,
         uint256 amount
@@ -24,21 +22,6 @@ contract HotswapBase is Ownable {
         }
 
         return false;
-    }
-
-    function _removeItem(
-        uint256[] storage arr,
-        uint256 index
-    ) internal returns (bool) {
-        uint256 last = arr.length - 1;
-        bool isLast = index == last;
-
-        if (!isLast) {
-            arr[index] = arr[last];
-        }
-
-        arr.pop();
-        return !isLast;
     }
 
     event NativeTransferred(uint256 amount, address targetAddr);

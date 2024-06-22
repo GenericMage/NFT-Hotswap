@@ -38,7 +38,7 @@ contract HotswapController is HotswapControllerBase {
             bytes memory data = new bytes(0);
 
             for (uint256 i = 0; i < amount; i++) {
-                tokenId = _nft.tokenOfOwnerByIndex(msg.sender, i);
+                tokenId = _nft.tokenOfOwnerByIndex(msg.sender, 0);
                 _nft.safeTransferFrom(msg.sender, _liquidity, tokenId, data);
             }
         } else if (!_fft.transferFrom(msg.sender, _liquidity, amount)) {
@@ -47,11 +47,6 @@ contract HotswapController is HotswapControllerBase {
     }
 
     function _createLiquid(uint256 amount, bool isNFT) private {
-        Liquid[] storage liquids = isNFT
-            ? _nftLiquids[msg.sender]
-            : _fftLiquids[msg.sender];
-
-        uint256 price = _updatePrice();
         nuint256 allocRatio;
 
         if (isNFT) {
@@ -61,60 +56,41 @@ contract HotswapController is HotswapControllerBase {
             allocRatio = _div(amount, _fetchLiquidity(isNFT));
         }
 
-        Liquid memory lq = Liquid(
-            price,
-            msg.sender,
-            block.timestamp,
-            amount,
-            allocRatio,
-            tVolume,
-            isNFT,
-            false
-        );
-
-        liquids.push(lq);
+        _liq.createLiquid(msg.sender, amount, allocRatio, tVolume, isNFT);
+        _updatePrice();
     }
 
     function queryLiquid(
         uint256 index,
         bool isNFT
-    ) external view returns (LiquidData memory) {
-        return queryLiquidbyDepositor(msg.sender, index, isNFT);
+    )
+        external
+        view
+        returns (
+            uint256 alloc,
+            nuint256 allocRatio,
+            uint256 dVolume,
+            bool claimed
+        )
+    {
+        return _liq.queryLiquid(msg.sender, index, isNFT);
     }
 
     function queryLiquidbyDepositor(
         address depositor,
         uint256 index,
         bool isNFT
-    ) public view returns (LiquidData memory) {
-        Liquid[] memory indexes = isNFT
-            ? _nftLiquids[depositor]
-            : _fftLiquids[depositor];
-
-        Liquid memory lq = indexes[index];
-
-        return
-            LiquidData(
-                lq.depositedAt,
-                lq.price,
-                lq.alloc,
-                lq.allocRatio,
-                lq.dVolume,
-                lq.kind,
-                lq.claimed
-            );
-    }
-
-    function _queryUserLiquid(
-        address user,
-        uint256 n,
-        bool isNFT
-    ) private view returns (Liquid storage) {
-        Liquid[] storage indexes = isNFT
-            ? _nftLiquids[user]
-            : _fftLiquids[user];
-
-        return indexes[n];
+    )
+        external
+        view
+        returns (
+            uint256 alloc,
+            nuint256 allocRatio,
+            uint256 dVolume,
+            bool claimed
+        )
+    {
+        return _liq.queryLiquid(depositor, index, isNFT);
     }
 
     function _fetchLiquidity(bool isNFT) private view returns (uint256) {
@@ -127,23 +103,25 @@ contract HotswapController is HotswapControllerBase {
 
     function claimFee(uint256 index, bool isNFT) public {
         address targetAddr = msg.sender;
-        Liquid storage liquid = _queryUserLiquid(msg.sender, index, isNFT);
 
-        if (liquid.claimed) {
+        (, nuint256 allocRatio, uint256 dVolume, bool claimed) = _liq
+            .queryLiquid(msg.sender, index, isNFT);
+
+        if (claimed) {
             revert FeeAlreadyClaimedForSlot();
         }
 
         uint256 tVol = tVolume;
-        uint256 cumulativeVol = tVol - liquid.dVolume;
+        uint256 cumulativeVol = tVol - dVolume;
 
         nuint256 volRatio = _div(cumulativeVol, tVol);
         nuint256 fees = _mul(volRatio, _fees);
-        nuint256 noutput = _mul(fees, liquid.allocRatio);
+        nuint256 noutput = _mul(fees, allocRatio);
 
         uint256 output = _denormalize(noutput);
 
         if (output <= 0 || _fft.transfer(targetAddr, output)) {
-            liquid.claimed = true;
+            _liq.claimLiquid(msg.sender, index, isNFT);
             emit FeeClaimed(targetAddr, output);
 
             _fees -= output;
@@ -151,22 +129,21 @@ contract HotswapController is HotswapControllerBase {
     }
 
     function withdrawLiquidity(uint256 index, bool isNFT) external {
-        Liquid memory lq = _queryUserLiquid(msg.sender, index, isNFT);
-        uint256 price = lq.price > 0 ? lq.price : _price;
-
-        if (price == 0) {
-            revert InvalidWithdrawalRequest();
-        }
+        (uint256 alloc, nuint256 allocRatio, , ) = _liq.queryLiquid(
+            msg.sender,
+            index,
+            isNFT
+        );
 
         uint256 currentLiquidity = _fetchLiquidity(isNFT);
 
-        uint256 outputAmount = _denormalize(
-            _mul(currentLiquidity, lq.allocRatio)
-        );
+        uint256 outputAmount = _denormalize(_mul(currentLiquidity, allocRatio));
 
-        if (outputAmount > lq.alloc) {
-            outputAmount = lq.alloc;
+        if (outputAmount > alloc) {
+            outputAmount = alloc;
         }
+
+        _liq.removeLiquid(msg.sender, index, isNFT);
 
         if (isNFT) {
             outputAmount = _scaleDown(outputAmount);
@@ -174,18 +151,6 @@ contract HotswapController is HotswapControllerBase {
         } else {
             _liq.withdrawFFT(outputAmount, msg.sender);
         }
-
-        _removeLiquidity(lq, index);
-    }
-
-    function _removeLiquidity(Liquid memory lq, uint256 index) private {
-        bool isNFT = lq.kind;
-
-        Liquid[] storage liquids = isNFT
-            ? _nftLiquids[msg.sender]
-            : _fftLiquids[msg.sender];
-
-        _removeItem(liquids, index);
     }
 
     function _addVolume(uint256 amount) private {

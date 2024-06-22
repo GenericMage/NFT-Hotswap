@@ -15,7 +15,7 @@ import "./HotswapBase.sol";
 import "./HotswapController.sol";
 import "./HotswapLiquidity.sol";
 
-contract HotswapFactory is HotswapBase {
+contract HotswapFactory is Ownable {
     address[] public controllers;
     address[] public liquids;
 
@@ -94,5 +94,18 @@ contract HotswapFactory is HotswapBase {
         _defaultCollector = payable(addr);
     }
 
+    function _transferNative(
+        address payable to,
+        uint256 amount
+    ) private returns (bool) {
+        if (to.send(amount)) {
+            emit NativeTransferred(amount, to);
+            return true;
+        }
+
+        return false;
+    }
+
+    event NativeTransferred(uint256 amount, address targetAddr);
     event HotswapDeployed(address controller, address liquidity);
 }

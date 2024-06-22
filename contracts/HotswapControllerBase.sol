@@ -23,9 +23,6 @@ contract HotswapControllerBase is HotswapPair {
     uint256 internal _scalar;
     uint256 internal _nftScalar;
 
-    mapping(address => Liquid[]) internal _nftLiquids;
-    mapping(address => Liquid[]) internal _fftLiquids;
-
     uint256 public _fees;
 
     HotswapLiquidity internal _liq;
@@ -75,7 +72,6 @@ contract HotswapControllerBase is HotswapPair {
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Math
-    type nuint256 is uint256;
 
     function _mul(
         uint256 num1,
@@ -196,31 +192,6 @@ contract HotswapControllerBase is HotswapPair {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Data Structures
-    struct Liquid {
-        uint256 price;
-        address depositor;
-        uint256 depositedAt;
-        uint256 alloc;
-        nuint256 allocRatio;
-        uint256 dVolume;
-        bool kind;
-        bool claimed;
-    }
-
-    struct LiquidData {
-        uint256 depositedAt;
-        uint256 price;
-        uint256 alloc;
-        nuint256 allocRatio;
-        uint256 dVolume;
-        bool kind;
-        bool claimed;
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Events and Errors
     event Swap(uint256 nft, uint256 fft, address user, uint256 price);
     event ChargedFee(uint256 fee);
@@ -233,23 +204,5 @@ contract HotswapControllerBase is HotswapPair {
     error InvalidSwapPrice();
     error FeeAlreadyClaimedForSlot();
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Util
-    function _removeItem(
-        Liquid[] storage arr,
-        uint256 index
-    ) internal returns (bool) {
-        uint256 last = arr.length - 1;
-        bool isLast = index == last;
-
-        if (!isLast) {
-            arr[index] = arr[last];
-        }
-
-        arr.pop();
-        return !isLast;
-    }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
