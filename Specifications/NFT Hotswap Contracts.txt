@@ -6,16 +6,77 @@ The System is made up of (3) contracts; NFT Hotswap Factory, NFT Hotswap Control
 
 /// Hotswap Liquidity ///
 This contract holds [NFT] items and [FFT] units for the listed tokens, allows an owner/controller to withdraw tokens from it, thereby enabling swaps. 
-The controller can transfer ownership, thereby allowing the existing controller to be updated. Controllers are owned by the hotswap factory, both controllers and liquidity contracts are created by the factory.  
+The factory can transfer ownership of the liquidity contract, thereby allowing the existing controller to be updated. Controllers and liquidity contracts are created and owned by the hotswap factory.  
 
-Functions; 
+! Liquidity Slots !
+Each Liquidity contract has storages for liquidity, these manage allocations of [NFT] and [FFT] stored under 'xLiquid' and 'yLiquid', users can add to these balances by using function 'depositNFT' and 'depositFFT' on the controller. Each time a user deposits; their details get written to 1/10000 'liquidity slots', each liquidity slot holds the following details;
 
-- withdraw ; used by the owner/controller to move [FFT] or [NFT] out of the Liquidity contract to a recipient. 
+depositor : (address)
+FFT Ratio : (uint256)
+NFT Ratio : (unit256)
+dVolume : (unit256)
+xAllocation : (uint256)
+yAllocation : (uint256)
+claimed : (bool)
+index : (uint256)
+
+"NFT Ratio" stores how much of the pool's NFT balance the depositor is entitled to. 
+
+"FFT Ratio" stores how much of the pool's FFT balance the depositor is entitled to.
+
+"dVolume" stores the tVolume value at the time the deposit was made and is necessary for claiming fees. 
+
+"Allocations" show how much was originally deposited by the address, this is necessary for calculating how much they are owed once they attempt to withdraw. 
+
+The "claimed" field is used to indicate if a user has claimed their fees or not, once set to "true" they can no longer claim, they can only withdraw their liquidity. 
+If a user does not claim before withdrawing, then their fees are forfeit. 
+
+Additional data stored by the liquidity contract are; 
+
+Fees : (uint256)
+tVolume : (uint256)
+
+"Fees" stores how much [FFT] has been taken from fees, this segregates the yLiquid from fees [See E6].
+ 
+"tVolume" indicates how much volume in FFT has been done by the listing contract, is updated after every buy/sell. This amount is acquired by the following formula; 
+
+FFT amount swapped + current volume = new volume
+
+"tVolume" is also important to the function 'claimFees'. 
+
+Fees are deducted upon each transaction, altering the FFT payout or initial swap principal and diverting the deducted amount into the liquidity contract's "fees" balance [See E3].
+
+! Functions !
+
+- withdraw (controllerOnly) ; used by the owner/controller to move [FFT] or [NFT] out of the Liquidity contract to a recipient. 
+
+- writeSlot (controllerOnly) ; writes details into a listing slot based on data from the controller, this adds new tokens to a slot or updates the claim status or clears the slot when withdrawal is initiated.
+
+- writeVolume (controllerOnly) ; writes data into the tVolume storage. 
+
+- writeFees (controllerOnly) ; writes data into the fees storage.  
+
+- setController (ownerOnly) ;
+Determines the controller. 
+
+- Controller 
+Returns the current controller address. 
 
 - FFT ; returns the stored FFT contract address. 
 
 - NFT ; returns the stored NFT contract address. 
 
+- queryLiquidbyIndex ; returns the details of a liquidity slot based on the total index. 
+
+- queryLiquidbyDepositor ; returns the details of a Liquidity slot based on the depositor, requires index number and address.
+
+- queryLiquid; requires "isFFT" (bool), returns the amount of [NFT] or [FFT] currently in x or y Liquid. 
+
+- queryPositions; requires "address", returns the liquidity slot numbers for a particular address. 
+
+- queryPositionbyIndex; requires a number, returns the full details of a liquidity slot, i.e the amount of [FFT] and [NFT] in the slot, who owns the slot, fees owed etc. 
+
+- queryLiquidity; returns the full Liquidity contract details excluding Liquidity slots. 
 
 /// Hotswap Controller ///
 This contract lets users pair NFTs and FFTs (Float-enabled fungible tokens) using CF/CP. The NFT collection and FFT token are set as constructor arguments. 
@@ -75,10 +136,10 @@ Determines where collector fees are sent to (ownerOnly).
 Returns the collector address. 
 
 - depositNFT ;
-Creates a liquidity slot entry for the address and deposits the stated number of NFTs.
+Creates a liquidity slot entry at the Liquidity contract for the caller address and deposits the stated number of NFTs.
 
 - depositFFT ;
-Creates a liquidity slot entry for the address and deposits the stated number of FFT.
+Same as depositNFT but for FFT units. 
  
 When "deposit" is called the contract gets the ratios for the liquidity slot using the following formula;
 
@@ -119,62 +180,19 @@ The amount a Liquidity provider is entitled to withdraw cannot be greater than t
 - liquidityAddress; 
 Set during deployment by the factory, determines where NFT items and FFT units are withdrawn / deposited to for swap or liquidity functions. 
 
-! Liquidity Slots !
-Each controller has storages for liquidity, these manage allocations of [NFT] and [FFT] stored under 'xLiquid' and 'yLiquid', users can add to these balances by using function 'depositNFT' and 'depositFFT'. Each time a user deposits; their details get written to 1/10000 'liquidity slots', each liquidity slot holds the following details;
+- setLiquidity (ownerOnly) 
+Sets the Liquidity address for the particular controller, carried out by the factory. 
 
-depositor : (address)
-FFT Ratio : (uint256)
-NFT Ratio : (unit256)
-dVolume : (unit256)
-xAllocation : (uint256)
-yAllocation : (uint256)
-claimed : (bool)
-index : (uint256)
-
-"NFT Ratio" stores how much of the pool's NFT balance the depositor is entitled to. 
-
-"FFT Ratio" stores how much of the pool's FFT balance the depositor is entitled to.
-
-"dVolume" stores the tVolume value at the time the deposit was made and is necessary for claiming fees. 
-
-"Allocations" show how much was originally deposited by the address, this is necessary for calculating how much they are owed once they attempt to withdraw. 
-
-The "claimed" field is used to indicate if a user has claimed their fees or not, once set to "true" they can no longer claim, they can only withdraw their liquidity. 
-If a user does not claim before withdrawing, then their fees are forfeit. 
-
+! data ! 
 The controller stores additional details such as; 
 
 xLiquid : (uint256)
 yLiquid : (uint256) 
-Fees : (uint256)
-tVolume : (uint256)
+
 
 "xLiquid" stores how much [NFT] is in the contract and can be used to settle sell swaps.
 
 "yLiquid" stores how much [FFT] is in the contract and can be used to settle buy swaps. 
-
-"Fees" stores how much [FFT] has been taken from fees, this segregates the yLiquid from fees [See E6].
- 
-"tVolume" indicates how much volume in FFT has been done by the listing contract, is updated after every buy/sell. This amount is acquired by the following formula; 
-
-FFT amount swapped + current volume = new volume
-
-"tVolume" is also important to the function 'claimFees'. 
-
-Fees are deducted upon each transaction, altering the FFT payout or initial swap principal and diverting the deducted amount into the token's "fees" balance [See E3].
-
-Functions;
-- queryLiquidbyIndex ; returns the details of a liquidity slot based on the total index. 
-
-- queryLiquidbyDepositor ; returns the details of a Liquidity slot based on the depositor, requires index number and address.
-
-- queryLiquid; requires "isFFT" (bool), returns the amount of [NFT] or [FFT] currently in x or y Liquid. 
-
-- queryPositions; requires "address", returns the liquidity slot numbers for a particular address. 
-
-- queryPositionbyIndex; requires a number, returns the full details of a liquidity slot, i.e the amount of [FFT] and [NFT] in the slot, who owns the slot, fees owed etc. 
-
-- queryLiquidity; returns the full Liquidity contract details excluding Liquidity slots. 
 
 ! NFT Hotswap factory ! 
 Deploys new hotswap controllers and hotswap LP contracts, this uses a stated ERC-20 address and ERC-721 address provided by the deployer. Fee collector is predefined into each controller/LP but can be changed by the owner, all deployed hotswaps are owned by the factory, can push transaction to change collector address on a hotswap or transfer ownership of a liquidity contract to a new controller. 
@@ -188,6 +206,9 @@ Changes the collector address on a hotswap controller.
 
 - setController
 Changes the controller for a liquidity address, thereby updating it. 
+
+- setLiquidity 
+Changes the Liquidity address of a controller, necessary for updating it. 
 
 - setFactory
 Changes the ownership of a controller and LP address. 
@@ -238,3 +259,5 @@ https://ethereum.stackexchange.com/questions/131588/how-can-i-verify-a-smart-con
 
 /// Notes ///
 - Initial collector will be a personal multi-sig, but will be changed to MarkerDAO later on. 
+
+- Liquidity contracts now store Liquidity slots - fees and tVolume , this ensures that when the controller is changed all existing Liquidity claims remain. 
