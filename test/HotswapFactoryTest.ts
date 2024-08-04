@@ -11,6 +11,7 @@ describe("HotswapFactory", function () {
 
   describe("Basic Functionality", async () => {
     it("deployHotswap should not fail", async () => {
+      loadFixture(classicDeploy).then((ress) => )
       const { factory, tendies, mockNFT } = await loadFixture(classicDeploy);
       const [owner] = await ethers.getSigners();
 

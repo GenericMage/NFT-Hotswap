@@ -14,9 +14,15 @@ import "./interfaces/ERC721.sol";
 import "./HotswapControllerBase.sol";
 
 contract HotswapController is HotswapControllerBase {
-    uint256 public tVolume;
-
     constructor(address nft, address fft) HotswapControllerBase(nft, fft) {}
+
+    function fees() public view returns (uint256) {
+        return _liq.fees();
+    }
+
+    function tVolume() public view returns (uint256) {
+        return _liq.tVolume();
+    }
 
     function depositNFT(uint256 amount) external {
         _deposit(amount, true);
@@ -29,8 +35,12 @@ contract HotswapController is HotswapControllerBase {
     }
 
     function _deposit(uint256 amount, bool isNFT) private {
-        if (amount <= 0) {
-            revert DepositFailed();
+        uint256 balance = isNFT
+            ? _nft.balanceOf(msg.sender)
+            : _fft.balanceOf(msg.sender);
+
+        if (amount > balance || amount == 0) {
+            revert InsufficientBalance(amount, balance);
         }
 
         if (isNFT) {
@@ -56,7 +66,7 @@ contract HotswapController is HotswapControllerBase {
             allocRatio = _div(amount, _fetchLiquidity(isNFT));
         }
 
-        _liq.createLiquid(msg.sender, amount, allocRatio, tVolume, isNFT);
+        _liq.createLiquid(msg.sender, amount, allocRatio, isNFT);
         _updatePrice();
     }
 
@@ -111,21 +121,20 @@ contract HotswapController is HotswapControllerBase {
             revert FeeAlreadyClaimedForSlot();
         }
 
-        uint256 tVol = tVolume;
+        uint256 tVol = tVolume();
         uint256 cumulativeVol = tVol - dVolume;
 
         nuint256 volRatio = _div(cumulativeVol, tVol);
-        nuint256 fees = _mul(volRatio, _fees);
-        nuint256 noutput = _mul(fees, allocRatio);
+        nuint256 fees_ = _mul(volRatio, fees());
+        nuint256 noutput = _mul(fees_, allocRatio);
 
         uint256 output = _denormalize(noutput);
 
-        if (output <= 0 || _fft.transfer(targetAddr, output)) {
-            _liq.claimLiquid(msg.sender, index, isNFT);
-            emit FeeClaimed(targetAddr, output);
+        _liq.withdrawFFT(output, targetAddr);
+        _liq.claimLiquid(msg.sender, index, isNFT);
 
-            _fees -= output;
-        }
+        _liq.withdrawFees(output);
+        emit FeeClaimed(targetAddr, output);
     }
 
     function withdrawLiquidity(uint256 index, bool isNFT) external {
@@ -154,7 +163,7 @@ contract HotswapController is HotswapControllerBase {
     }
 
     function _addVolume(uint256 amount) private {
-        tVolume += amount;
+        _liq.addVolume(amount);
     }
 
     function _determineCost(
@@ -221,8 +230,7 @@ contract HotswapController is HotswapControllerBase {
         uint256 remFee = fee - collectorFee;
 
         _liq.withdrawFFT(collectorFee, _collector);
-        _liq.withdrawFFT(remFee, address(this));
-        _fees += remFee;
+        _liq.allocateFees(remFee);
 
         emit ChargedFee(fee);
     }

@@ -5,6 +5,7 @@ import { boolean } from "hardhat/internal/core/params/argumentTypes";
 // require("hardhat-contract-sizer");
 require('hardhat-ethernal');
 
+
 configDotenv();
 
 const optimizerSettings = {
@@ -24,6 +25,28 @@ interface HardhatContractSizerConfig {
     only?: string[],
   }
 }
+
+// const getApiKey = () => {
+//   const networkName = hre.network.name
+//   const chainId = hre.network.config.chainId
+
+//   console.log(networkName, chainId);
+//   throw new Error()
+
+//   switch (process.env.HARDHAT_NETWORK) {
+//     case "polygon":
+//     case "mumbai":
+//       return process.env.POLY_API_KEY as string;
+
+//     case "fantom":
+//       return process.env.FTM_API_KEY as string;
+
+//     case "avax":
+//       return process.env.SNOWTRACE_API_KEY as string
+//     default:
+//       return "";
+//   }
+// }
 
 // TODO: API keys leaked. Changed during production
 const config: HardhatUserConfig & Partial<HardhatContractSizerConfig> = {
@@ -59,6 +82,7 @@ const config: HardhatUserConfig & Partial<HardhatContractSizerConfig> = {
   //"0.8.25",
   etherscan: {
     apiKey: process.env.POLY_API_KEY as string
+    // apiKey: process.env.FTM_API_KEY as string
     // apiKey: process.env.SNOWTRACE_API_KEY as string
   },
   networks: {
@@ -78,7 +102,7 @@ const config: HardhatUserConfig & Partial<HardhatContractSizerConfig> = {
     ftm_testnet: {
       url: "https://rpc.testnet.fantom.network",
       chainId: 4002,
-      accounts: [process.env.PRIVATE_KEY as string],
+      accounts: [process.env.CPRIVATE_KEY as string],
     },
     poly_mainnet: {
       url: "https://polygon-rpc.com/",
@@ -88,7 +112,7 @@ const config: HardhatUserConfig & Partial<HardhatContractSizerConfig> = {
     avax_testnet: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
       chainId: 43113,
-      accounts: [process.env.PRIVATE_KEY as string],
+      accounts: [process.env.CPRIVATE_KEY as string],
     }
   }
 };

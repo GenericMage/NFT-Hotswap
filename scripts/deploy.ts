@@ -38,11 +38,31 @@ async function deployFactory() {
   }
 }
 
+async function keepTrying(action: () => Promise<unknown>, delay = 3000) {
+  let cb: ((value?: unknown) => void) = () => { };
+
+  while (true) {
+    try {
+      await action();
+      break;
+    } catch (err) {
+      console.error(err);
+
+
+      const promise = new Promise((resolve) => cb = resolve);
+      setTimeout(() => {
+        cb();
+      }, delay)
+      await promise;
+    }
+  }
+}
+
 async function main() {
   configDotenv();
 
   const feeData = await ethers.provider.getFeeData();
-  // console.log(feeData)
+  console.log("Fee Data", feeData);
 
   const factory = await ethers.deployContract("HotswapFactory");
 
@@ -52,7 +72,6 @@ async function main() {
   const liquidityFactory = await ethers.getContractFactory("HotswapLiquidity");
   const legacyLiquidity = await liquidityFactory.deploy(ZeroAddress, ZeroAddress);
 
-  // const legacyController
 
   await factory.deploymentTransaction();
 
@@ -68,21 +87,30 @@ async function main() {
   console.log(`HotswapFactory: ${factoryAddr}`);
   console.log(`HotswapLegacyController: ${controller}`);
   console.log(`HotswapLegacyLiquidity: ${liquidity}`);
+  console.log(); console.log();
 
   if (network.name != "localhost") {
-    await run("verify:verify", {
-      address: factoryAddr
-    })
+    await keepTrying(() => {
+      return run("verify:verify", {
+        address: factoryAddr
+      });
+    });
 
-    await run("verify:verify", {
-      address: controller,
-      constructorArguments: [ZeroAddress, ZeroAddress]
-    })
+    await keepTrying(() => {
+      return run("verify:verify", {
+        address: controller,
+        constructorArguments: [ZeroAddress, ZeroAddress]
+      });
+    });
 
-    await run("verify:verify", {
-      address: liquidity,
-      constructorArguments: [ZeroAddress, ZeroAddress]
-    })
+    await keepTrying(() => {
+      return run("verify:verify", {
+        address: liquidity,
+        constructorArguments: [ZeroAddress, ZeroAddress]
+      });
+    });
+
+
   } else {
     hre.ethernal.push({
       name: "HotswapFactory",

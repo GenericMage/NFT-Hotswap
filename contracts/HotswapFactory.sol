@@ -27,6 +27,7 @@ contract HotswapFactory is Ownable {
 
     address payable _defaultCollector;
     uint256 public constant DEPLOY_FEE = 1e15;
+    uint256 private constant DEV = 9466;
 
     constructor() {
         _defaultCollector = payable(msg.sender);
@@ -44,8 +45,14 @@ contract HotswapFactory is Ownable {
         address factoryAddr
     ) external onlyOwner {
         HotswapController ctrl = HotswapController(controllerAddr);
+        address liquidityAddr = ctrl._liquidity();
+
+        HotswapLiquidity liq = HotswapLiquidity(liquidityAddr);
+
         ctrl.transferOwnership(factoryAddr);
-        _removePair(controllerAddr, ctrl._liquidity());
+        try liq.transferOwnership(factoryAddr) {} catch {}
+
+        _removePair(controllerAddr, liquidityAddr);
 
         try
             HotswapFactory(factoryAddr).adoptController(controllerAddr)
@@ -80,15 +87,14 @@ contract HotswapFactory is Ownable {
         address newAddr
     ) external onlyOwner {
         HotswapController ctrl = HotswapController(controllerAddr);
+        HotswapLiquidity liq = HotswapLiquidity(newAddr);
         address liquidityAddr = ctrl._liquidity();
 
-        (bool valid, ) = _getPair(controllerAddr, liquidityAddr);
+        _removePair(controllerAddr, liquidityAddr);
 
-        if (valid) {
-            _removePair(controllerAddr, liquidityAddr);
-        }
+        ctrl.setLiquidity(newAddr);
+        try liq.setController(controllerAddr) {} catch {}
 
-        ctrl.setLiquidity(liquidityAddr);
         _addPair(controllerAddr, newAddr);
     }
 
@@ -96,16 +102,15 @@ contract HotswapFactory is Ownable {
         address liquidityAddr,
         address newAddr
     ) external onlyOwner {
+        HotswapController ctrl = HotswapController(newAddr);
         HotswapLiquidity liq = HotswapLiquidity(liquidityAddr);
         address controllerAddr = liq.controller();
 
-        (bool valid, ) = _getPair(controllerAddr, liquidityAddr);
-
-        if (valid) {
-            _removePair(controllerAddr, liquidityAddr);
-        }
+        _removePair(controllerAddr, liquidityAddr);
 
         liq.setController(newAddr);
+        try ctrl.setLiquidity(liquidityAddr) {} catch {}
+
         _addPair(newAddr, liquidityAddr);
     }
 
@@ -154,15 +159,18 @@ contract HotswapFactory is Ownable {
             return;
         }
 
-        uint256 nlast = _pairLength - 1;
+        uint256 nlast = _pairLength > 0 ? _pairLength - 1 : 0;
+        AddressPair memory last = pairs[nlast];
+
+        delete pairs[nlast];
+        delete indexMap[controller][liquidity];
+
         if (nlast != n) {
-            AddressPair memory last = pairs[nlast];
             indexMap[last.controller][last.liquidity] = n;
             pairs[n] = last;
         }
 
-        delete pairs[nlast];
-        delete indexMap[controller][liquidity];
+        _pairLength--;
     }
 
     function setDefaultCollector(address addr) external {

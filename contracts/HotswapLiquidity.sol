@@ -15,6 +15,7 @@ import "./HotswapLiquidStorage.sol";
 
 contract HotswapLiquidity is HotswapLiquidStorage {
     address public controller;
+    uint256 public fees;
 
     constructor(address nft, address fft) HotswapLiquidStorage(nft, fft) {}
 
@@ -59,6 +60,14 @@ contract HotswapLiquidity is HotswapLiquidStorage {
         _auth[controller] = false;
         controller = addr;
         _auth[controller] = true;
+    }
+
+    function allocateFees(uint256 amount) external onlyAuthorized {
+        fees += amount;
+    }
+
+    function withdrawFees(uint256 amount) external onlyAuthorized {
+        fees -= amount;
     }
 
     event WithdrawNFT(uint256 amount, address addr);

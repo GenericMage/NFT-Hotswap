@@ -21,6 +21,8 @@ contract HotswapLiquidStorage is HotswapPair {
         _auth[_owner] = true;
     }
 
+    uint256 public tVolume;
+
     mapping(address => bool) internal _auth;
     mapping(address => Liquid[]) public nftLiquids;
     mapping(address => Liquid[]) public fftLiquids;
@@ -47,7 +49,6 @@ contract HotswapLiquidStorage is HotswapPair {
         address depositor,
         uint256 alloc,
         nuint256 allocRatio,
-        uint256 tVol,
         bool isNFT
     ) external onlyAuthorized {
         Liquid[] storage liquids = isNFT
@@ -58,7 +59,7 @@ contract HotswapLiquidStorage is HotswapPair {
             block.timestamp,
             alloc,
             allocRatio,
-            tVol,
+            tVolume,
             isNFT,
             false
         );
@@ -85,6 +86,10 @@ contract HotswapLiquidStorage is HotswapPair {
             : fftLiquids[depositor];
 
         _removeLQ(indexes, index);
+    }
+
+    function addVolume(uint256 amount) external onlyAuthorized {
+        tVolume += amount;
     }
 
     function _query(

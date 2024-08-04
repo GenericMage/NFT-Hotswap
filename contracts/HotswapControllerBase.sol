@@ -23,8 +23,6 @@ contract HotswapControllerBase is HotswapPair {
     uint256 internal _scalar;
     uint256 internal _nftScalar;
 
-    uint256 public _fees;
-
     HotswapLiquidity internal _liq;
     nuint256 FEE_CONSTANT = nuint256.wrap(5e14); // 0.05% => 500000000000000;
     nuint256 MAX_LIQUIDITY_CONSTANT = nuint256.wrap(51e16); // 51% => 510000000000000000;
@@ -42,7 +40,7 @@ contract HotswapControllerBase is HotswapPair {
     }
 
     function fftLiquidity() public view returns (uint256) {
-        return _liq.fftBalance();
+        return _liq.fftBalance() - _liq.fees();
     }
 
     function _updatePrice() internal returns (uint256) {
@@ -196,11 +194,13 @@ contract HotswapControllerBase is HotswapPair {
     event ChargedFee(uint256 fee);
     event FeeClaimed(address user, uint256 amount);
 
+    error InsufficientBalance(uint256 required, uint256 available);
     error DepositFailed();
     error InvalidWithdrawalRequest();
     error InsufficientLiquidity();
     error InsufficientSwapAmount();
     error InvalidSwapPrice();
     error FeeAlreadyClaimedForSlot();
+    error NoReason(uint256 a, uint256 b);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
