@@ -72,9 +72,10 @@ swap input + delta =  maxInput
 
 Slippage setting is determined for sells as; 
 
-amount * price = swap output
-swap output / 100 * slippage = delta
-swap output - delta =  minOutput
+NFT swap amount * price = FFT output
+NFT swap amount / NFT Liquidity * 100 = impact percent 
+FFT output / 100 * (slippage + impact percent) = delta
+FFT output - delta =  minOutput
 
 "slippage" is the number set in the slippage field on 1k.
 
